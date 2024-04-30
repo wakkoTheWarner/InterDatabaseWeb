@@ -3,16 +3,25 @@
 #ini_set('display_startup_errors', 1);
 #error_reporting(E_ALL);
 
+$config = require_once '../backend/php/config.php';
+
 session_start([
     'cookie_lifetime' => 86400,
-    'read_and_close'  => true,
 ]);
 
+ini_set('session.cookie_secure', '1');
+ini_set('session.cookie_httponly', '1');
 if (!empty($_POST)) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
 
-    $db = new SQLite3('../backend/database/interDatabase.db');
+    if ($config['db']['type'] === 'sqlite') {
+        $db = new SQLite3($config['db']['sqlite']['path']);
+    } elseif ($config['db']['type'] === 'mysql') {
+        $dsn = "mysql:host={$config['db']['mysql']['host']};dbname={$config['db']['mysql']['dbname']}";
+        $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
+    }
+
     $stmt = $db->prepare('SELECT * FROM user WHERE Email = :email');
     $stmt->bindValue(':email', $email, SQLITE3_TEXT);
 
