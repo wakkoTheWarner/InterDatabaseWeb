@@ -1,0 +1,128 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Header */
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.logo {
+    margin: 30px 0;
+    text-align: center;
+}
+
+/* Body */
+
+#container {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../img/college-friends-having-fun.jpg') center center no-repeat;
+    background-size: cover;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 0;
+    flex-grow: 1;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px 50px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    text-align: center;
+}
+
+.form-container .header {
+    margin-bottom: 20px;
+}
+
+.form-container .inputBox {
+    padding: 10px 0;
+}
+
+.form-container .inputBox label {
+    display: flex;
+    text-align: left;
+}
+
+.form-container .inputBox input {
+    padding-right: 150px;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-container option {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-container button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background-color: #008345;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #005f2f;
+}
+
+.form-container .error {
+    background-color: #F8D6D9;
+    color: #711B23;
+    border: 1px solid #F8A199;
+    padding: 10px 20px;
+    margin: 5px 0;
+    border-radius: 5px;
+    text-align: left;
+}
+
+/* Footer */
+
+footer {
+    margin: 30px 0;
+    text-align: center;
+}
