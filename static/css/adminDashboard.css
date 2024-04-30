@@ -86,3 +86,7 @@ nav a:hover {
 .show {
     display: block;
 }
+
+#logout:hover {
+    cursor: pointer;
+}

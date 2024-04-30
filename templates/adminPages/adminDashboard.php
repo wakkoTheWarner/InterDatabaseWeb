@@ -33,7 +33,7 @@ if (!isset($_SESSION['email'])) {
         <div id="userDropdown" class="dropdownContent">
             <a href="#">Profile</a>
             <a href="#">Settings</a>
-            <a href="#" style="background-color: #FF9999;">Logout</a>
+            <a id="logout" style="background-color: #FF9999;">Log Out</a>
         </div>
     </div>
 </div>
