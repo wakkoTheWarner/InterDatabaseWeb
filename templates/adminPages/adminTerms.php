@@ -1,7 +1,10 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Modify error reporting for production use
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/path/to/php-error.log');
 
 $config = require_once '../../backend/php/config.php';
 
@@ -22,8 +25,14 @@ if (!isset($_SESSION['email'])) {
     $result = $stmt->execute();
     $terms = $result->fetchArray(SQLITE3_ASSOC);
 
-    if (isset($_POST['termKey']) && isset($_POST['termName']) && isset($_POST['termStart']) && isset($_POST['termEnd'])) {
-        addTerm();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['updateTermID'], $_POST['updateTermKey'], $_POST['updateTermName'], $_POST['updateTermStart'], $_POST['updateTermEnd'])) {
+            updateTerm();
+        } elseif (isset($_POST['delete'])) {
+            deleteTerm();
+        } elseif (isset($_POST['termKey'], $_POST['termName'], $_POST['termStart'], $_POST['termEnd'])) {
+            addTerm();
+        }
     }
 
     $terms = []; // Initialize the $terms variable.
@@ -49,11 +58,25 @@ function addTerm() {
 }
 
 function updateTerm() {
-    // TODO: Implement updateTerm function
+    global $db;
+    $stmt = $db->prepare('UPDATE term SET TermKey = :termKey, TermName = :termName, TermStart = :termStart, TermEnd = :termEnd WHERE TermID = :termID');
+    $stmt->bindValue(':termKey', $_POST['updateTermKey'], SQLITE3_TEXT);
+    $stmt->bindValue(':termName', $_POST['updateTermName'], SQLITE3_TEXT);
+    $stmt->bindValue(':termStart', $_POST['updateTermStart'], SQLITE3_TEXT);
+    $stmt->bindValue(':termEnd', $_POST['updateTermEnd'], SQLITE3_TEXT);
+    $stmt->bindValue(':termID', $_POST['updateTermID'], SQLITE3_INTEGER);
+    $stmt->execute();
+    header('Location: adminTerms.php');
+    exit;
 }
 
 function deleteTerm() {
-    // TODO: Implement deleteTerm function
+    global $db;
+    $stmt = $db->prepare('DELETE FROM term WHERE TermID = :termID');
+    $stmt->bindValue(':termID', $_POST['delete'], SQLITE3_INTEGER);
+    $stmt->execute();
+    header('Location: adminTerms.php');
+    exit;
 }
 
 function sortTable() {
@@ -175,7 +198,12 @@ function fetchAllRows($result) {
                         echo '<td>' . htmlspecialchars($row['TermName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['TermStart'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['TermEnd'] ?? '') . '</td>';
-                        echo '<td><button>Update</button><button>Delete</button></td>';
+                        echo '<td><button class="updateButton">Update</button><form method="POST">';
+                    ?>
+                        <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['TermID'] ?? ''); ?>">
+                        <button class="deleteButton" type="submit">Delete</button>
+                    <?php
+                        echo '</form></td>';
                         echo '</tr>';
                     }
                     ?>
@@ -183,36 +211,48 @@ function fetchAllRows($result) {
             </div>
         </div>
     </div>
-    <script>
-        document.getElementById('logout').addEventListener('click', function() {
-            fetch('../../backend/php/logout.php')
-                .then(response => response.text())
-                .then(data => {
-                    if(data === 'success') {
-                        window.location.href = '../index.php';
-                    }
-                });
-        });
-
-        function myFunction() {
-            document.getElementById("userDropdown").classList.toggle("show");
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.matches('.userDropdownButton')) {
-                var dropdowns = document.getElementsByClassName("dropdownContent");
-                var i;
-                for (i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-    </script>
+    <div id="updateModal" class="modal">
+        <div class="modalContainer">
+            <div class="closeButton">
+                <span class="close">&times;</span>
+            </div>
+            <div class="termsFormUpdate">
+                <div class="header">
+                    <h2>Update Term</h2>
+                </div>
+                <div class="form-container">
+                    <form method="POST">
+                        <div class="inputBox" hidden="hidden">
+                            <label for="updateTermID">Term ID:</label>
+                            <input type="text" name="updateTermID" id="updateTermID" placeholder="Term ID" required>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateTermKey">Term Key:</label>
+                            <input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateTermName">Term Name:</label>
+                            <input type="text" name="updateTermName" id="updateTermName" placeholder="Term Name" required>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateTermStart">Term Start:</label>
+                            <input type="date" name="updateTermStart" id="updateTermStart" required>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateTermEnd">Term End:</label>
+                            <input type="date" name="updateTermEnd" id="updateTermEnd" required>
+                        </div>
+                        <div class="inputBox">
+                            <button type="submit">Update Term</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <footer>
         <p>&copy; 2024 Inter CurricuLab</p>
     </footer>
+    <script src="../../static/js/adminTerms.js"></script>
 </body>
 </html>
