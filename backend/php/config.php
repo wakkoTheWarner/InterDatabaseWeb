@@ -3,7 +3,7 @@ return [
     'db' => [
         'type' => 'sqlite',
         'sqlite' => [
-            'path' => '../backend/database/interDatabase.db',
+            'path' => $_SERVER['DOCUMENT_ROOT'] . '/backend/database/interDatabase.db',
         ],
         'mysql' => [
             'host' => 'localhost',
