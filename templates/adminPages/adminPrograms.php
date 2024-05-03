@@ -138,6 +138,7 @@ function fetchAllRows($result) {
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
                 <a href="#">Settings</a>
+                <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
         </div>

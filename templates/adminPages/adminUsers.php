@@ -172,6 +172,7 @@ function fetchAllRows($result) {
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
                 <a href="#">Settings</a>
+                <a href="#">Users</a>
                 <a id="logout">Log Out</a>
             </div>
         </div>
@@ -187,6 +188,10 @@ function fetchAllRows($result) {
                 <div class="header">
                     <h2>Users Manager</h2>
                 </div>
+                <?php
+                // if current session user is not root or admin, do not allow to add new user
+                if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
+                ?>
                 <div class="form-container">
                     <form method="POST">
                         <div class="inputBox">
@@ -214,7 +219,12 @@ function fetchAllRows($result) {
                                 $stmt = $db->prepare('SELECT * FROM accountType');
                                 $result = $stmt->execute();
                                 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($row['AccountType'] ?? '') . '">' . htmlspecialchars($row['AccountType'] ?? '') . '</option>';
+                                    // if user is not root, root and admin account type should not be available
+                                    if ($_SESSION['accountType'] !== 'Root' && $row['AccountType'] !== 'Root' && $row['AccountType'] !== 'Admin') {
+                                        echo '<option value="' . htmlspecialchars($row['AccountType'] ?? '') . '">' . htmlspecialchars($row['AccountType'] ?? '') . '</option>';
+                                    } elseif ($_SESSION['accountType'] === 'Root') {
+                                        echo '<option value="' . htmlspecialchars($row['AccountType'] ?? '') . '">' . htmlspecialchars($row['AccountType'] ?? '') . '</option>';
+                                    }
                                 }
                                 ?>
                             </select>
@@ -224,6 +234,9 @@ function fetchAllRows($result) {
                         </div>
                     </form>
                 </div>
+                <?php
+                }
+                ?>
             </div>
             <div class="usersTable">
                 <table>
@@ -254,27 +267,62 @@ function fetchAllRows($result) {
                                 <button type="submit" name="sort" value="AccountType">Account Type</button>
                             </form>
                         </th>
+                        <?php
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
+                        ?>
                         <th>Actions</th>
+                        <?php
+                        }
+                        ?>
                     </tr>
                     <?php
                     foreach ($users as $row) {
                         echo '<tr>';
                         echo '<td hidden>' . htmlspecialchars($row['UserID'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['Email'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['Password'] ?? '') . '</td>';
+                        // randomly generate asterisks for password security from 8 to 16 characters
+                        $passwordLength = rand(8, 16);
+                        $passwordAsterisks = str_repeat('*', $passwordLength);
+                        echo '<td>' . htmlspecialchars($passwordAsterisks) . '</td>';
                         echo '<td>' . htmlspecialchars($row['FirstName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['LastName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['AccountType'] ?? '') . '</td>';
                         echo '<td>';
-                        ?>
-                        <div class="actionButtons">
-                            <button class="updateButton">Update</button>
-                            <form method="POST">
-                                <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['UserID'] ?? ''); ?>">
-                                <button class="deleteButton" type="submit">Delete</button>
-                            </form>
-                        </div>
-                        <?php
+                        // if root user, do not allow to update or delete
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
+                            if ($row['AccountType'] !== 'Root') {
+                            ?>
+                            <div class="actionButtons">
+                                <button class="updateButton">Update</button>
+                                <form method="POST">
+                                    <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['UserID'] ?? ''); ?>">
+                                    <?php
+                                    // if session user is admin, do not allow to delete root and admin users
+                                    if ($_SESSION['accountType'] === 'Admin' && $row['AccountType'] === 'Admin') {
+                                        ?>
+                                    <button class="deleteButton" type="submit" disabled style="background-color: grey;">Delete</button>
+                                    <?php
+                                    } else {
+                                        ?>
+                                    <button class="deleteButton" type="submit">Delete</button>
+                                    <?php
+                                    }
+                                    ?>
+                                </form>
+                            </div>
+                            <?php
+                            } else {
+                                ?>
+                            <div class="actionButtons">
+                                <button class="updateButton" disabled style="background-color: grey;">Update</button>
+                                <form method="POST">
+                                    <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['UserID'] ?? ''); ?>">
+                                    <button class="deleteButton" type="submit" disabled style="background-color: grey;">Delete</button>
+                                </form>
+                            </div>
+                            <?php
+                            }
+                        }
                         echo '</td>';
                         echo '</tr>';
                     }
@@ -314,9 +362,14 @@ function fetchAllRows($result) {
                             <label for="updateLastName">Last Name:</label>
                             <input type="text" name="updateLastName" id="updateLastName" placeholder="Last Name" required>
                         </div>
-                        <div class="inputBox">
+                        <?php
+                        // if current session user is not root, do not allow to update account type
+                        if ($_SESSION['accountType'] === 'Root') {
+                            ?>
+                        <div class="inputBox" hidden="hidden">
                             <label for="updateAccountType">Account Type:</label>
-                            <select name="updateAccountType" id="updateAccountType" required>
+                            <select name="updateAccountType" id="updateAccountType" required hidden="hidden">
+                                <option value="" hidden="hidden" selected>Select Account Type</option>
                                 <?php
                                 // Use the account types from accountType table
                                 $stmt = $db->prepare('SELECT * FROM accountType');
@@ -327,6 +380,26 @@ function fetchAllRows($result) {
                                 ?>
                             </select>
                         </div>
+                        <?php
+                        } else {
+                            ?>
+                        <div class="inputBox" hidden="hidden">
+                            <label for="updateAccountType" hidden="hidden">Account Type:</label>
+                            <select name="updateAccountType" id="updateAccountType" required hidden="hidden">
+                                <option value="" hidden="hidden" selected>Select Account Type</option>
+                                <?php
+                                // Use the account types from accountType table
+                                $stmt = $db->prepare('SELECT * FROM accountType');
+                                $result = $stmt->execute();
+                                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                                    echo '<option value="' . htmlspecialchars($row['AccountType'] ?? '') . '">' . htmlspecialchars($row['AccountType'] ?? '') . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <?php
+                        }
+                        ?>
                         <div class="inputBox">
                             <button type="submit">Update User</button>
                         </div>
