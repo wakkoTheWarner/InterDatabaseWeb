@@ -193,7 +193,7 @@ function fetchAllRows($result) {
                         echo '<tr>';
                         echo '<td hidden>' . htmlspecialchars($row['CompetencyID'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyKey'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['CompetencyDesc'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['CompetencyDesc'] ?? '') . '</td>';
                         echo '<td>';
                         ?>
                         <div class="actionButtons">

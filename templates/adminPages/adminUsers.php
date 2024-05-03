@@ -369,7 +369,7 @@ function fetchAllRows($result) {
                             ?>
                         <div class="inputBox" hidden="hidden">
                             <label for="updateAccountType">Account Type:</label>
-                            <select name="updateAccountType" id="updateAccountType" required hidden="hidden">
+                            <select name="updateAccountType" id="updateAccountType" required>
                                 <option value="" hidden="hidden" selected>Select Account Type</option>
                                 <?php
                                 // Use the account types from accountType table
