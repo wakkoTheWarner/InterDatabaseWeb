@@ -125,8 +125,9 @@ function fetchAllRows($result) {
         <nav>
             <a href="adminDashboard.php">Dashboard</a>
             <a href="adminTerms.php">Terms</a>
-            <a href="#">Competencies</a>
+            <a href="adminPrograms.php">Programs</a>
             <a href="#">Courses</a>
+            <a href="#">Competencies</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">

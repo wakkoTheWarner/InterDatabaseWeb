@@ -28,6 +28,7 @@ if (!isset($_SESSION['email'])) {
             <a href="adminTerms.php">Terms</a>
             <a href="adminPrograms.php">Programs</a>
             <a href="#">Courses</a>
+            <a href="adminCompetency.php">Competencies</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">
