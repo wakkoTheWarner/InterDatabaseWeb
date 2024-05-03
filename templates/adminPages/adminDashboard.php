@@ -26,7 +26,7 @@ if (!isset($_SESSION['email'])) {
         <nav>
             <a href="#">Dashboard</a>
             <a href="adminTerms.php">Terms</a>
-            <a href="#">Programs</a>
+            <a href="adminPrograms.php">Programs</a>
             <a href="#">Courses</a>
         </nav>
         <div class="userBox">

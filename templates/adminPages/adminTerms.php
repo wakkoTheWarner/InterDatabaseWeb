@@ -129,7 +129,7 @@ function fetchAllRows($result) {
         <nav>
             <a href="adminDashboard.php">Dashboard</a>
             <a href="#">Terms</a>
-            <a href="#">Programs</a>
+            <a href="adminPrograms.php">Programs</a>
             <a href="#">Courses</a>
         </nav>
         <div class="userBox">
