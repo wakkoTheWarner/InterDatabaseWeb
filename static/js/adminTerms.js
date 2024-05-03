@@ -40,7 +40,7 @@ var span = document.getElementsByClassName("close")[0];
 for (let i = 0; i < btns.length; i++) {
     btns[i].onclick = function () {
         // Get the row of the clicked button
-        let row = this.parentElement.parentElement;
+        let row = this.closest('tr');
 
         // Get the data from the row
         let termID = row.children[0].innerText;

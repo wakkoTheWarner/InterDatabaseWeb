@@ -53,7 +53,13 @@ function addTerm() {
     $stmt->bindValue(':termStart', $_POST['termStart'], SQLITE3_TEXT);
     $stmt->bindValue(':termEnd', $_POST['termEnd'], SQLITE3_TEXT);
     $stmt->execute();
-    header('Location: adminTerms.php');
+
+    // if user typed in term key that already exists, display error message
+    if ($db->lastErrorCode() === 19) {
+        header('Location: adminTerms.php?error=' . urlencode('Term key already exists.'));
+    } else {
+        header('Location: adminTerms.php');
+    }
     exit;
 }
 
@@ -66,7 +72,13 @@ function updateTerm() {
     $stmt->bindValue(':termEnd', $_POST['updateTermEnd'], SQLITE3_TEXT);
     $stmt->bindValue(':termID', $_POST['updateTermID'], SQLITE3_INTEGER);
     $stmt->execute();
-    header('Location: adminTerms.php');
+
+    // if user typed in term key that already exists, display error message
+    if ($db->lastErrorCode() === 19) {
+        header('Location: adminTerms.php?error=' . urlencode('Term key already exists.'));
+    } else {
+        header('Location: adminTerms.php');
+    }
     exit;
 }
 
@@ -137,6 +149,11 @@ function fetchAllRows($result) {
     <div id="container">
         <div class="container-upperBox">
             <div class="termsForm">
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="error">
+                        <p><?php echo htmlspecialchars($_GET['error']); ?></p>
+                    </div>
+                <?php endif; ?>
                 <div class="header">
                     <h2>Terms Manager</h2>
                 </div>
@@ -198,12 +215,17 @@ function fetchAllRows($result) {
                         echo '<td>' . htmlspecialchars($row['TermName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['TermStart'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['TermEnd'] ?? '') . '</td>';
-                        echo '<td><button class="updateButton">Update</button><form method="POST">';
+                        echo '<td>';
                     ?>
-                        <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['TermID'] ?? ''); ?>">
-                        <button class="deleteButton" type="submit">Delete</button>
+                        <div class="actionButtons">
+                            <button class="updateButton">Update</button>
+                            <form method="POST">
+                                <input type="hidden" name="delete" value="<?php echo htmlspecialchars($row['TermID'] ?? ''); ?>">
+                                <button class="deleteButton" type="submit">Delete</button>
+                            </form>
+                        </div>
                     <?php
-                        echo '</form></td>';
+                        echo '</td>';
                         echo '</tr>';
                     }
                     ?>
@@ -223,13 +245,24 @@ function fetchAllRows($result) {
                 <div class="form-container">
                     <form method="POST">
                         <div class="inputBox" hidden="hidden">
-                            <label for="updateTermID">Term ID:</label>
-                            <input type="text" name="updateTermID" id="updateTermID" placeholder="Term ID" required>
+                            <label for="updateTermID" hidden="hidden">Term ID:</label>
+                            <input type="text" name="updateTermID" id="updateTermID" placeholder="Term ID" required hidden="hidden">
                         </div>
-                        <div class="inputBox">
-                            <label for="updateTermKey">Term Key:</label>
-                            <input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required>
-                        </div>
+                        <?php
+                        // If user is Root or Admin, let them update the Term Key
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'test') {
+                            echo '<div class="inputBox">';
+                            echo '<label for="updateTermKey">Term Key:</label>';
+                            echo '<input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required>';
+                            echo '<p class="warning">WARNING: Changing the term key can have significant implications. Proceed with caution.</p>';
+                            echo '</div>';
+                        } else {
+                            echo '<div class="inputBox">';
+                            echo '<label for="updateTermKey">Term Key:</label>';
+                            echo '<input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required disabled>';
+                            echo '</div>';
+                        }
+                        ?>
                         <div class="inputBox">
                             <label for="updateTermName">Term Name:</label>
                             <input type="text" name="updateTermName" id="updateTermName" placeholder="Term Name" required>

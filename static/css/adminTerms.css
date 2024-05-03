@@ -17,6 +17,17 @@
     flex-grow: 1;
 }
 
+.error {
+    background-color: #F8D6D9;
+    color: #711B23;
+    border: 1px solid #F8A199;
+    padding: 10px 20px;
+    margin: 5px 0;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+}
+
 /* Form */
 
 .termsForm {
@@ -124,7 +135,7 @@
     text-align: center;
 }
 
-.termsTable table td button {
+.termsTable table td button:not(.updateButton, .deleteButton) {
     padding: 10px 10px;
     margin: 0 5px;
     font-size: 1em;
@@ -136,17 +147,48 @@
     cursor: pointer;
 }
 
-.termsTable table td button:hover {
+.termsTable table td button:hover:not(.updateButton, .deleteButton) {
     background-color: #0056b3;
 }
 
+.actionButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
 .updateButton {
-    float: left;
+    padding: 10px 10px;
+    margin: 0 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.updateButton:hover {
+    background-color: #218838;
 }
 
 .deleteButton {
-    float: right;
-    background-color: red;
+    padding: 10px 10px;
+    margin: 0 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.deleteButton:hover {
+    background-color: #c82333;
 }
 
 /* Update Modal */
@@ -246,4 +288,14 @@
 
 .termsFormUpdate .inputBox button:hover {
     background-color: #0056b3;
+}
+
+.warning {
+    color: red;
+    font-weight: bold;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    margin: 5px 0;
+    padding: 10px 20px;
+    border-radius: 5px;
 }

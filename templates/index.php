@@ -39,6 +39,7 @@ if (!empty($_POST)) {
         $_SESSION['email'] = $user['Email'];
         $_SESSION['firstName'] = $user['FirstName'];
         $_SESSION['lastName'] = $user['LastName'];
+        $_SESSION['accountType'] = $user['AccountType'];
         header('Location: adminPages/adminDashboard.php');
         exit;
     } else {
