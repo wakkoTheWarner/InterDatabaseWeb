@@ -68,7 +68,7 @@ body {
 }
 
 .form-container .inputBox input {
-    padding-right: 150px;
+    padding-right: 0;
 }
 
 .form-container input {

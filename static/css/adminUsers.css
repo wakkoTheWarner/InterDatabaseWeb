@@ -1,0 +1,301 @@
+/* Container */
+/* Make container full height from header to footer */
+#container { display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+    flex-grow: 1;
+}
+
+.container-upperBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 1;
+}
+
+.error {
+    background-color: #F8D6D9;
+    color: #711B23;
+    border: 1px solid #F8A199;
+    padding: 10px 20px;
+    margin: 5px 0;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Form */
+
+.usersForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.usersForm .header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.usersForm .inputBox:not(:last-child) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.usersForm .inputBox:last-child {
+    /* submit button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.usersForm .inputBox label {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.usersForm .inputBox input, .usersForm .inputBox select{
+    width: 100%;
+    padding: 10px;
+    margin-right: 350px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.usersForm .inputBox button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.usersForm .inputBox button:hover {
+    background-color: #0056b3;
+}
+
+/* Table */
+
+.usersTable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.usersTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usersTable table th {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    font-size: 1.2em;
+}
+
+.usersTable table th button {
+    font-size: 1em;
+    font-weight: bold;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.usersTable table th button:hover {
+    background-color: #f5f5f5;
+}
+
+.usersTable table td {
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+
+.usersTable table td button:not(.updateButton, .deleteButton) {
+    padding: 10px 10px;
+    margin: 0 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.usersTable table td button:hover:not(.updateButton, .deleteButton) {
+    background-color: #0056b3;
+}
+
+.actionButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.updateButton {
+    padding: 10px 10px;
+    margin: 0 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.updateButton:hover {
+    background-color: #218838;
+}
+
+.deleteButton {
+    padding: 10px 10px;
+    margin: 0 5px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.deleteButton:hover {
+    background-color: #c82333;
+}
+
+/* Update Modal */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-content: center;
+}
+
+.modalContainer {
+    display: flex;
+    flex-direction: column;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.usersFormUpdate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 20px 0;
+}
+
+.usersFormUpdate .header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.usersFormUpdate .inputBox:not(:last-child) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.usersFormUpdate .inputBox:last-child {
+    /* submit button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.usersFormUpdate .inputBox label {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.usersFormUpdate .inputBox input {
+    width: 100%;
+    padding: 10px;
+    margin-right: 350px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.usersFormUpdate .inputBox button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.usersFormUpdate .inputBox button:hover {
+    background-color: #0056b3;
+}
+
+.warning {
+    color: red;
+    font-weight: bold;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    margin: 5px 0;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
