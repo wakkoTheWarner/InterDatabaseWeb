@@ -106,9 +106,19 @@ nav a:hover {
 
 .dropdownContent a:hover {
     background-color: #f1f1f1;
+    border-radius: 5px;
 }
 
 .show {
+    display: block;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown:hover .dropdownContent {
     display: block;
 }
 
