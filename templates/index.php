@@ -40,8 +40,14 @@ if (!empty($_POST)) {
         $_SESSION['firstName'] = $user['FirstName'];
         $_SESSION['lastName'] = $user['LastName'];
         $_SESSION['accountType'] = $user['AccountType'];
-        header('Location: adminPages/adminDashboard.php');
-        exit;
+
+        if ($user['AccountType'] === 'Root' || $user['AccountType'] === 'Admin' || $user['AccountType'] === 'Staff') {
+            header('Location: adminPages/adminDashboard.php');
+            exit;
+        } elseif ($user['AccountType'] === 'Professor') {
+            header('Location: staffPages/profPage.php');
+            exit;
+        }
     } else {
         $error = 'Invalid email or password.';
     }
@@ -85,14 +91,6 @@ if (!empty($_POST)) {
                 <div class="inputBox">
                     <label for="password">Password:</label>
                     <input type="password" name="password" id="password" placeholder="Password" required>
-                </div>
-                <div class="inputBox">
-                    <label for="accountType">Account Type:</label>
-                    <select name="accountType" id="accountType">
-                        <option value="" selected hidden="hidden">Select Account Type...</option>
-                        <option value="admin">Admin</option>
-                        <option value="prof">Professor</option>
-                    </select>
                 </div>
                 <button type="submit">Login</button>
             </form>
