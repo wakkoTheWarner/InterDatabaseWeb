@@ -133,7 +133,7 @@ function fetchAllRows($result) {
         <nav>
             <a href="adminDashboard.php">Dashboard</a>
             <a href="adminTerms.php">Terms</a>
-            <a href="#">Courses</a>
+            <a href="adminPrograms.php">Programs</a>
             <a href="#">Courses</a>
             <a href="adminCompetency.php">Competencies</a>
         </nav>
