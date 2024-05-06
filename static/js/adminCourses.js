@@ -46,20 +46,29 @@ for (let i = 0; i < btns.length; i++) {
         let courseID = row.children[0].innerText;
         let courseKey = row.children[1].innerText;
         let courseName = row.children[2].innerText;
-        let competencyKeys = row.children[3].innerText;
+        let competencyKey = row.children[3].innerText;
         let objectiveDescription = row.children[4].innerText;
-        let
+        let evaluationInstrument = row.children[5].innerText;
+        let competencyMetric = row.children[6].innerText;
 
         // Get the form fields
         let form = document.querySelector('.coursesFormUpdate form');
         let courseIDField = form.querySelector('input[name="updateCourseID"]');
         let courseKeyField = form.querySelector('input[name="updateCourseKey"]');
         let courseNameField = form.querySelector('input[name="updateCourseName"]');
+        let competencyKeyField = form.querySelector('select[name="updateCompetencyKey"]');
+        let objectiveDescriptionField = form.querySelector('textarea[name="updateObjectiveDescription"]');
+        let evaluationInstrumentField = form.querySelector('textarea[name="updateEvaluationInstrument"]');
+        let competencyMetricField = form.querySelector('textarea[name="updateCompetencyMetric"]');
 
         // Populate the form fields with the data
         courseIDField.value = courseID;
         courseKeyField.value = courseKey;
         courseNameField.value = courseName;
+        competencyKeyField.value = competencyKey;
+        objectiveDescriptionField.value = objectiveDescription;
+        evaluationInstrumentField.value = evaluationInstrument;
+        competencyMetricField.value = competencyMetric;
 
         // Show the modal
         modal.style.display = "block";

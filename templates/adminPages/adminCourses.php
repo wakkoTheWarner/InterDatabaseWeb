@@ -26,11 +26,11 @@ if (!isset($_SESSION['email'])) {
     $courses = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['updateCourseID'], $_POST['updateCourseKey'], $_POST['updateCourseName'])) {
+        if (isset($_POST['updateCourseID'], $_POST['updateCourseKey'], $_POST['updateCourseName'], $_POST['updateCompetencyKey'], $_POST['updateObjectiveDescription'], $_POST['updateEvaluationInstrument'], $_POST['updateCompetencyMetric'])) {
             updateCourse();
         } elseif (isset($_POST['delete'])) {
             deleteCourse();
-        } elseif (isset($_POST['courseKey'], $_POST['courseName'])) {
+        } elseif (isset($_POST['courseKey'], $_POST['courseName'], $_POST['competencyKey'], $_POST['objectiveDescription'], $_POST['evaluationInstrument'], $_POST['competencyMetric'])) {
             addCourse();
         }
     }
@@ -47,9 +47,13 @@ if (!isset($_SESSION['email'])) {
 
 function addCourse() {
     global $db;
-    $stmt = $db->prepare('INSERT INTO course (CourseKey, CourseName) VALUES (:courseKey, :courseName)');
+    $stmt = $db->prepare('INSERT INTO course (CourseKey, CourseName, CompetencyKey, ObjectiveDescription, EvaluationInstrument, CompetencyMetric) VALUES (:courseKey, :courseName, :competencyKey, :objectiveDescription, :evaluationInstrument, :competencyMetric)');
     $stmt->bindValue(':courseKey', $_POST['courseKey'], SQLITE3_TEXT);
     $stmt->bindValue(':courseName', $_POST['courseName'], SQLITE3_TEXT);
+    $stmt->bindValue(':competencyKey', $_POST['competencyKey'], SQLITE3_TEXT);
+    $stmt->bindValue(':objectiveDescription', $_POST['objectiveDescription'], SQLITE3_TEXT);
+    $stmt->bindValue(':evaluationInstrument', $_POST['evaluationInstrument'], SQLITE3_TEXT);
+    $stmt->bindValue(':competencyMetric', $_POST['competencyMetric'], SQLITE3_TEXT);
     $stmt->execute();
 
     // if user typed in course key that already exists, display error message
@@ -63,9 +67,13 @@ function addCourse() {
 
 function updateCourse() {
     global $db;
-    $stmt = $db->prepare('UPDATE course SET CourseKey = :courseKey, CourseName = :courseName WHERE CourseID = :courseID');
+    $stmt = $db->prepare('UPDATE course SET CourseKey = :courseKey, CourseName = :courseName, CompetencyKey = :competencyKey, ObjectiveDescription = :objectiveDescription, EvaluationInstrument = :evaluationInstrument, CompetencyMetric = :competencyMetric WHERE CourseID = :courseID');
     $stmt->bindValue(':courseKey', $_POST['updateCourseKey'], SQLITE3_TEXT);
     $stmt->bindValue(':courseName', $_POST['updateCourseName'], SQLITE3_TEXT);
+    $stmt->bindValue(':competencyKey', $_POST['updateCompetencyKey'], SQLITE3_TEXT);
+    $stmt->bindValue(':objectiveDescription', $_POST['updateObjectiveDescription'], SQLITE3_TEXT);
+    $stmt->bindValue(':evaluationInstrument', $_POST['updateEvaluationInstrument'], SQLITE3_TEXT);
+    $stmt->bindValue(':competencyMetric', $_POST['updateCompetencyMetric'], SQLITE3_TEXT);
     $stmt->bindValue(':courseID', $_POST['updateCourseID'], SQLITE3_INTEGER);
     $stmt->execute();
 
@@ -89,7 +97,7 @@ function deleteCourse() {
 
 function sortTable() {
     global $db;
-    $allowed_keys = ['CourseKey', 'CourseName'];
+    $allowed_keys = ['CourseKey', 'CourseName', 'CompetencyKey', 'ObjectiveDescription', 'EvaluationInstrument', 'CompetencyMetric'];
     $sort = isset($_POST['sort']) && in_array($_POST['sort'], $allowed_keys) ? $_POST['sort'] : 'CourseKey';
 
     $stmt = $db->prepare("SELECT * FROM course ORDER BY $sort");
@@ -170,17 +178,17 @@ function fetchAllRows($result) {
                             <select name="competencyKey" id="competencyKey">
                                 <option value="" hidden="hidden">Select a Competency</option>
                                 <?php
-                                $stmt = $db->prepare('SELECT * FROM competency');
+                                $stmt = $db->prepare('SELECT CompetencyKey FROM competency');
                                 $result = $stmt->execute();
                                 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($row['CompetencyID']) . '">' . htmlspecialchars($row['CompetencyKey']) . '</option>';
+                                    echo '<option value="' . htmlspecialchars($row['CompetencyKey']) . '">' . htmlspecialchars($row['CompetencyKey']) . '</option>';
                                 }
                                 ?>
                             </select>
                         </div>
                         <div class="inputBox">
-                            <label for="objectiveDesc">Objective Description:</label>
-                            <textarea name="objectiveDesc" id="objectiveDesc" placeholder="Objective Description" required></textarea>
+                            <label for="objectiveDescription">Objective Description:</label>
+                            <textarea name="objectiveDescription" id="objectiveDescription" placeholder="Objective Description" required></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="evaluationInstrument">Evaluation Instrument:</label>
@@ -189,6 +197,7 @@ function fetchAllRows($result) {
                         <div class="inputBox">
                             <label for="competencyMetric">Competency Metric:</label>
                             <textarea name="competencyMetric" id="competencyMetric" placeholder="Competency Metric" required></textarea>
+                        </div>
                         <div class="inputBox">
                             <button type="submit">Add Course</button>
                         </div>
@@ -216,7 +225,7 @@ function fetchAllRows($result) {
                         </th>
                         <th>
                             <form method="POST">
-                                <button type="submit" name="sort" value="ObjectiveDesc">Objective Description</button>
+                                <button type="submit" name="sort" value="ObjectiveDescription">Objective Description</button>
                             </form>
                         </th>
                         <th>
@@ -238,7 +247,7 @@ function fetchAllRows($result) {
                         echo '<td>' . htmlspecialchars($row['CourseKey'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CourseName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyKey'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['ObjectiveDesc'] ?? '') . '</td>';
+                        echo '<td>' . htmlspecialchars($row['ObjectiveDescription'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['EvaluationInstrument'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyMetric'] ?? '') . '</td>';
                         echo '<td>';
@@ -296,19 +305,19 @@ function fetchAllRows($result) {
                         <div class="inputBox">
                             <label for="updateCompetencyKey">Competency:</label>
                             <select name="updateCompetencyKey" id="updateCompetencyKey">
-                                <option value="" hidden="hidden">Select a Competency</option>
+                                <option value="" hidden="hidden" selected>Select Account Type</option>
                                 <?php
-                                $stmt = $db->prepare('SELECT * FROM competency');
+                                $stmt = $db->prepare('SELECT CompetencyKey FROM competency');
                                 $result = $stmt->execute();
                                 while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($row['CompetencyID']) . '">' . htmlspecialchars($row['CompetencyKey']) . '</option>';
+                                    echo '<option value="' . htmlspecialchars($row['CompetencyKey']) . '">' . htmlspecialchars($row['CompetencyKey']) . '</option>';
                                 }
                                 ?>
                             </select>
                         </div>
                         <div class="inputBox">
-                            <label for="updateObjectiveDesc">Objective Description:</label>
-                            <textarea name="updateObjectiveDesc" id="updateObjectiveDesc" placeholder="Objective Description" required></textarea>
+                            <label for="updateObjectiveDescription">Objective Description:</label>
+                            <textarea name="updateObjectiveDescription" id="updateObjectiveDescription" placeholder="Objective Description" required></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateEvaluationInstrument">Evaluation Instrument:</label>

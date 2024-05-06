@@ -266,13 +266,14 @@
     margin-bottom: 10px;
 }
 
-.coursesFormUpdate .inputBox input {
+.coursesFormUpdate .inputBox input, .coursesFormUpdate .inputBox select, .coursesFormUpdate .inputBox textarea {
     width: 100%;
     padding: 10px;
     margin-right: 350px;
     font-size: 1em;
     border-radius: 5px;
     border: 1px solid #ccc;
+    vertical-align: auto;
 }
 
 .coursesFormUpdate .inputBox button {
@@ -298,4 +299,14 @@
     margin: 5px 0;
     padding: 10px 20px;
     border-radius: 5px;
+}
+
+.coursesForm .inputBox textarea, .coursesFormUpdate .inputBox textarea {
+    width: 100%;
+    padding: 10px;
+    margin-right: 350px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: vertical;
 }
