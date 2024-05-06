@@ -164,7 +164,7 @@ function fetchAllRows($result) {
                 <a href="adminCourses.php">Courses</a>
                 <div class="dropdownContent">
                     <a href="adminCompetency.php">Competencies</a>
-                    <a href="#">Section</a>
+                    <a href="adminSection.php">Section</a>
                 </div>
             </div>
         </nav>
