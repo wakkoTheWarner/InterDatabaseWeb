@@ -129,10 +129,16 @@
     background-color: #f5f5f5;
 }
 
-.coursesTable table td {
+.coursesTable table td:not(.textArea) {
     padding: 20px;
     border-bottom: 1px solid #ccc;
     text-align: center;
+}
+
+.coursesTable table td.textArea {
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
 }
 
 .coursesTable table td button:not(.updateButton, .deleteButton) {

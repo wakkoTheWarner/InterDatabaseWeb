@@ -252,9 +252,9 @@ function fetchAllRows($result) {
                         echo '<td>' . htmlspecialchars($row['CourseKey'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CourseName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyKey'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['ObjectiveDescription'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['EvaluationInstrument'] ?? '') . '</td>';
-                        echo '<td>' . htmlspecialchars($row['CompetencyMetric'] ?? '') . '</td>';
+                        echo '<td class="textArea">' . htmlspecialchars($row['ObjectiveDescription'] ?? '') . '</td>';
+                        echo '<td class="textArea">' . htmlspecialchars($row['EvaluationInstrument'] ?? '') . '</td>';
+                        echo '<td class="textArea">' . htmlspecialchars($row['CompetencyMetric'] ?? '') . '</td>';
                         echo '<td>';
                         ?>
                         <div class="actionButtons">
