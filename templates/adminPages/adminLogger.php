@@ -66,10 +66,24 @@ if (!isset($_SESSION['email'])) {
         </div>
     </div>
     <div id="container">
-        <div class="container-upperBox">
-            <h1>Admin Log Viewer</h1>
-            <pre><?php echo htmlspecialchars($logContents); ?></pre>
-        </div>
+        <?php
+        // check if log.txt exists, if not, show error message
+        if ($logContents === 'Error: Unable to open the log file.') {
+            ?>
+            <div class="container-upperBox">
+                <h1>Admin Log Viewer</h1>
+                <textarea id="logContents" readonly>[WARNING!] The log "log.txt" file does not exist or could not be opened.</textarea>
+            </div>
+            <?php
+        } else {
+            ?>
+            <div class="container-upperBox">
+                <h1>Admin Log Viewer</h1>
+                <textarea id="logContents" readonly><?php echo $logContents; ?></textarea>
+            </div>
+        <?php
+        }
+        ?>
     </div>
     <script>
         document.getElementById('logout').addEventListener('click', function() {

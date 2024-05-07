@@ -18,3 +18,17 @@
 .container-upperBox h1 {
     margin: 20px;
 }
+
+.container-upperBox textarea {
+    width: 100%;
+    height: 500px;
+    margin: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: none;
+}
+
+.container-upperBox textarea:focus {
+    outline: none;
+}
