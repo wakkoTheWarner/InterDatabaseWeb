@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addSection() {
     global $db;
     $stmt = $db->prepare('INSERT INTO section (SectionKey, CourseKey, ProfessorEmail) VALUES (:sectionKey, :courseKey, :professorEmail)');
@@ -57,6 +65,7 @@ function addSection() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminSection.php?error=' . urlencode('Section key already exists.'));
     } else {
+        logAction('Added section: ' . $_POST['sectionKey']);
         header('Location: adminSection.php');
     }
     exit;
@@ -75,6 +84,7 @@ function updateSection() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminSection.php?error=' . urlencode('Section key already exists.'));
     } else {
+        logAction('Updated section: ' . $_POST['updateSectionKey']);
         header('Location: adminSection.php');
     }
     exit;
@@ -82,6 +92,14 @@ function updateSection() {
 
 function deleteSection() {
     global $db;
+    // query the section ID to get the section key, course key, and professor email for the logger
+    $stmt = $db->prepare('SELECT * FROM section WHERE SectionID = :sectionID');
+    $stmt->bindValue(':sectionID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted section: ' . $section['SectionKey']);
+
     $stmt = $db->prepare('DELETE FROM section WHERE SectionID = :sectionID');
     $stmt->bindValue(':sectionID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -145,7 +163,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
@@ -263,7 +285,7 @@ function fetchAllRows($result) {
                         </div>
                         <?php
                         // If user is Root or Admin, let them update the Section Key
-                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'test') {
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
                             echo '<div class="inputBox">';
                             echo '<label for="updateSectionKey">Section Key:</label>';
                             echo '<input type="text" name="updateSectionKey" id="updateSectionKey" placeholder="Section Key" required>';
@@ -271,8 +293,8 @@ function fetchAllRows($result) {
                             echo '</div>';
                         } else {
                             echo '<div class="inputBox">';
-                            echo '<label for="updateSectionKey">Section Key:</label>';
-                            echo '<input type="text" name="updateSectionKey" id="updateSectionKey" placeholder="Section Key" required disabled>';
+                            echo '<label for="updateSectionKey" hidden="hidden">Section Key:</label>';
+                            echo '<input type="text" name="updateSectionKey" id="updateSectionKey" placeholder="Section Key" required hidden="hidden">';
                             echo '</div>';
                         }
                         ?>

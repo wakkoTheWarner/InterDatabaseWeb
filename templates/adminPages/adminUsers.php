@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addUser() {
     global $db;
     $stmt = $db->prepare('INSERT INTO user (Email, Password, FirstName, LastName, AccountType) VALUES (:email, :password, :firstName, :lastName, :accountType)');
@@ -72,6 +80,7 @@ function addUser() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminUsers.php?error=' . urlencode('User key already exists.'));
     } else {
+        logAction('User added: ' . $_POST['email']);
         header('Location: adminUsers.php');
     }
     exit;
@@ -107,6 +116,7 @@ function updateUser() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminUsers.php?error=' . urlencode('User key already exists.'));
     } else {
+        logAction('User updated: ' . $_POST['updateEmail']);
         header('Location: adminUsers.php');
     }
     exit;
@@ -114,6 +124,14 @@ function updateUser() {
 
 function deleteUser() {
     global $db;
+    // query the section ID to get the section key, course key, and professor email for the logger
+    $stmt = $db->prepare('SELECT * FROM user WHERE UserID = :userID');
+    $stmt->bindValue(':userID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted user: ' . $section['Email']);
+
     $stmt = $db->prepare('DELETE FROM user WHERE UserID = :userID');
     $stmt->bindValue(':userID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -177,7 +195,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="#">Users</a>
                 <a id="logout">Log Out</a>
             </div>

@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addCourse() {
     global $db;
     $stmt = $db->prepare('INSERT INTO course (CourseKey, CourseName, CompetencyKey, ObjectiveDescription, EvaluationInstrument, CompetencyMetric) VALUES (:courseKey, :courseName, :competencyKey, :objectiveDescription, :evaluationInstrument, :competencyMetric)');
@@ -60,6 +68,7 @@ function addCourse() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminCourses.php?error=' . urlencode('Course key already exists.'));
     } else {
+        logAction('Added course: ' . $_POST['courseKey']);
         header('Location: adminCourses.php');
     }
     exit;
@@ -81,6 +90,7 @@ function updateCourse() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminCourses.php?error=' . urlencode('Course key already exists.'));
     } else {
+        logAction('Updated course: ' . $_POST['updateCourseKey']);
         header('Location: adminCourses.php');
     }
     exit;
@@ -88,6 +98,13 @@ function updateCourse() {
 
 function deleteCourse() {
     global $db;
+    $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyID = :competencyID');
+    $stmt->bindValue(':courseID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted course: ' . $section['CourseKey']);
+
     $stmt = $db->prepare('DELETE FROM course WHERE CourseID = :courseID');
     $stmt->bindValue(':courseID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -151,7 +168,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
@@ -290,7 +311,7 @@ function fetchAllRows($result) {
                         </div>
                         <?php
                         // If user is Root or Admin, let them update the Course Key
-                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'test') {
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
                             echo '<div class="inputBox">';
                             echo '<label for="updateCourseKey">Course Key:</label>';
                             echo '<input type="text" name="updateCourseKey" id="updateCourseKey" placeholder="Course Key" required>';
@@ -298,8 +319,8 @@ function fetchAllRows($result) {
                             echo '</div>';
                         } else {
                             echo '<div class="inputBox">';
-                            echo '<label for="updateCourseKey">Course Key:</label>';
-                            echo '<input type="text" name="updateCourseKey" id="updateCourseKey" placeholder="Course Key" required disabled>';
+                            echo '<label for="updateCourseKey" hidden="hidden">Course Key:</label>';
+                            echo '<input type="text" name="updateCourseKey" id="updateCourseKey" placeholder="Course Key" required hidden="hidden">';
                             echo '</div>';
                         }
                         ?>

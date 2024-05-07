@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addTerm() {
     global $db;
     $stmt = $db->prepare('INSERT INTO term (TermKey, TermName, TermStart, TermEnd) VALUES (:termKey, :termName, :termStart, :termEnd)');
@@ -58,6 +66,7 @@ function addTerm() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminTerms.php?error=' . urlencode('Term key already exists.'));
     } else {
+        logAction('Added terms: ' . $_POST['termKey']);
         header('Location: adminTerms.php');
     }
     exit;
@@ -77,6 +86,7 @@ function updateTerm() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminTerms.php?error=' . urlencode('Term key already exists.'));
     } else {
+        logAction('Updated terms: ' . $_POST['updateTermKey']);
         header('Location: adminTerms.php');
     }
     exit;
@@ -84,6 +94,14 @@ function updateTerm() {
 
 function deleteTerm() {
     global $db;
+    // query the section ID to get the section key, course key, and professor email for the logger
+    $stmt = $db->prepare('SELECT * FROM term WHERE TermID = :termID');
+    $stmt->bindValue(':termID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted term: ' . $section['TermKey']);
+
     $stmt = $db->prepare('DELETE FROM term WHERE TermID = :termID');
     $stmt->bindValue(':termID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -147,7 +165,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
@@ -257,7 +279,7 @@ function fetchAllRows($result) {
                         </div>
                         <?php
                         // If user is Root or Admin, let them update the Term Key
-                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'test') {
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
                             echo '<div class="inputBox">';
                             echo '<label for="updateTermKey">Term Key:</label>';
                             echo '<input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required>';
@@ -265,8 +287,8 @@ function fetchAllRows($result) {
                             echo '</div>';
                         } else {
                             echo '<div class="inputBox">';
-                            echo '<label for="updateTermKey">Term Key:</label>';
-                            echo '<input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required disabled>';
+                            echo '<label for="updateTermKey" hidden="hidden">Term Key:</label>';
+                            echo '<input type="text" name="updateTermKey" id="updateTermKey" placeholder="Term Key" required hidden="hidden">';
                             echo '</div>';
                         }
                         ?>

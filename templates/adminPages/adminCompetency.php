@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addCompetency() {
     global $db;
     $stmt = $db->prepare('INSERT INTO competency (CompetencyKey, CompetencyDesc) VALUES (:competencyKey, :competencyDesc)');
@@ -56,6 +64,7 @@ function addCompetency() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminCompetency.php?error=' . urlencode('Competency key already exists.'));
     } else {
+        logAction('Added competency: ' . $_POST['competencyKey']);
         header('Location: adminCompetency.php');
     }
     exit;
@@ -73,6 +82,7 @@ function updateCompetency() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminCompetency.php?error=' . urlencode('Competency key already exists.'));
     } else {
+        logAction('Updated competency: ' . $_POST['updateCompetencyKey']);
         header('Location: adminCompetency.php');
     }
     exit;
@@ -80,6 +90,14 @@ function updateCompetency() {
 
 function deleteCompetency() {
     global $db;
+    // query the section ID to get the section key, course key, and professor email for the logger
+    $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyID = :competencyID');
+    $stmt->bindValue(':competencyID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted competency: ' . $section['CompetencyKey']);
+
     $stmt = $db->prepare('DELETE FROM competency WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':competencyID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -143,7 +161,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
@@ -242,8 +264,8 @@ function fetchAllRows($result) {
                             echo '</div>';
                         } else {
                             echo '<div class="inputBox">';
-                            echo '<label for="updateCompetencyKey">Competency Key:</label>';
-                            echo '<input type="text" name="updateCompetencyKey" id="updateCompetencyKey" placeholder="Competency Key" required disabled>';
+                            echo '<label for="updateCompetencyKey" hidden="hidden">Competency Key:</label>';
+                            echo '<input type="text" name="updateCompetencyKey" id="updateCompetencyKey" placeholder="Competency Key" required hidden="hidden">';
                             echo '</div>';
                         }
                         ?>

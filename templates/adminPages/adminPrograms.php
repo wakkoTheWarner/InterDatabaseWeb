@@ -45,6 +45,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addProgram() {
     global $db;
     $stmt = $db->prepare('INSERT INTO program (ProgramKey, ProgramName) VALUES (:programKey, :programName)');
@@ -56,6 +64,7 @@ function addProgram() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminPrograms.php?error=' . urlencode('Program key already exists.'));
     } else {
+        logAction('Added program: ' . $_POST['programKey']);
         header('Location: adminPrograms.php');
     }
     exit;
@@ -73,6 +82,7 @@ function updateProgram() {
     if ($db->lastErrorCode() === 19) {
         header('Location: adminPrograms.php?error=' . urlencode('Program key already exists.'));
     } else {
+        logAction('Updated program: ' . $_POST['updateProgramKey']);
         header('Location: adminPrograms.php');
     }
     exit;
@@ -80,6 +90,13 @@ function updateProgram() {
 
 function deleteProgram() {
     global $db;
+    $stmt = $db->prepare('SELECT * FROM program WHERE ProgramID = :programID');
+    $stmt->bindValue(':programID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+    logAction('Deleted program: ' . $section['ProgramKey']);
+
     $stmt = $db->prepare('DELETE FROM program WHERE ProgramID = :programID');
     $stmt->bindValue(':programID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
@@ -143,7 +160,11 @@ function fetchAllRows($result) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <?php
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
+                }
+                ?>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
@@ -233,7 +254,7 @@ function fetchAllRows($result) {
                         </div>
                         <?php
                         // If user is Root or Admin, let them update the Program Key
-                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'test') {
+                        if ($_SESSION['accountType'] === 'Root' || $_SESSION['accountType'] === 'Admin') {
                             echo '<div class="inputBox">';
                             echo '<label for="updateProgramKey">Program Key:</label>';
                             echo '<input type="text" name="updateProgramKey" id="updateProgramKey" placeholder="Program Key" required>';
@@ -241,8 +262,8 @@ function fetchAllRows($result) {
                             echo '</div>';
                         } else {
                             echo '<div class="inputBox">';
-                            echo '<label for="updateProgramKey">Program Key:</label>';
-                            echo '<input type="text" name="updateProgramKey" id="updateProgramKey" placeholder="Program Key" required disabled>';
+                            echo '<label for="updateProgramKey" hidden="hidden">Program Key:</label>';
+                            echo '<input type="text" name="updateProgramKey" id="updateProgramKey" placeholder="Program Key" required hidden="hidden">';
                             echo '</div>';
                         }
                         ?>

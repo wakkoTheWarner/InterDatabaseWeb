@@ -5,6 +5,21 @@ session_start();
 if (!isset($_SESSION['email'])) {
     header('Location: ../index.php');
     exit;
+} else {
+    // Open the log file
+    $logFile = fopen('../../backend/log/log.txt', 'r');
+
+    // Check if the file was opened successfully
+    if ($logFile) {
+        // Read the entire contents of the file
+        $logContents = fread($logFile, filesize('../../backend/log/log.txt'));
+
+        // Close the file
+        fclose($logFile);
+    } else {
+        // Handle the error
+        $logContents = 'Error: Unable to open the log file.';
+    }
 }
 ?>
 
@@ -12,9 +27,9 @@ if (!isset($_SESSION['email'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Log Viewer</title>
     <link rel="stylesheet" href="../../static/css/headerFooter.css">
-    <link rel="stylesheet" href="../../static/css/adminDashboard.css">
+    <link rel="stylesheet" href="../../static/css/adminLogger.css">
 </head>
 <body>
     <div id="headerNav">
@@ -24,7 +39,7 @@ if (!isset($_SESSION['email'])) {
             </a>
         </div>
         <nav>
-            <a href="#">Dashboard</a>
+            <a href="adminDashboard.php">Dashboard</a>
             <a href="adminTerms.php">Terms</a>
             <a href="adminPrograms.php">Programs</a>
             <div class="dropdown">
@@ -44,17 +59,17 @@ if (!isset($_SESSION['email'])) {
             </button>
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
-                <?php
-                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
-                    echo '<a href="adminLogger.php">Logger</a>';
-                }
-                ?>
+                <a href="#">Logger</a>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
             </div>
         </div>
     </div>
     <div id="container">
+        <div class="container-upperBox">
+            <h1>Admin Log Viewer</h1>
+            <pre><?php echo htmlspecialchars($logContents); ?></pre>
+        </div>
     </div>
     <script>
         document.getElementById('logout').addEventListener('click', function() {
