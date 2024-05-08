@@ -16,3 +16,148 @@
     border-radius: 10px;
     flex-grow: 1;
 }
+
+/* Form */
+
+.programSelector {
+    width: 30%;
+    display: flex;
+    align-content: center;
+    text-align: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.programSelector h2 {
+    margin: 10px 0;
+    font-size: 1.5em;
+}
+
+#programForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 1;
+}
+
+#programForm label {
+    margin: 10px 0;
+}
+
+#programForm select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#programForm button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#programForm button:hover {
+    background-color: #45a049;
+}
+
+/* Course Table 1 */
+
+.coursesTable {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    border-collapse: collapse;
+    margin: 20px;
+}
+
+.coursesTable th {
+    background-color: #f2f2f2;
+}
+
+.coursesTable th, .coursesTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.coursesTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.coursesTable tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Buttons */
+
+.addButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.addButton:hover {
+    background-color: #45a049;
+}
+
+/* Added Course Table */
+
+.addedCourses {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    border-collapse: collapse;
+    margin: 20px;
+}
+
+.addedCourses th {
+    background-color: #f2f2f2;
+}
+
+.addedCourses th, .addedCourses td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.addedCourses tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.addedCourses tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Buttons */
+
+.removeButton {
+    background-color: #f44336;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.removeButton:hover {
+    background-color: #f44336;
+}
