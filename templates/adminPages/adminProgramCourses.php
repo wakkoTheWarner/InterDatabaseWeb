@@ -148,160 +148,164 @@ function fetchAllRows($result) {
     </div>
     <div id="container">
         <div class="container-upperBox">
-            <div class="programSelector">
-                <h2>Program Courses Management</h2>
-                <form id="programForm">
-                    <label for="program">Program:</label>
-                    <select id="program" name="program">
-                        <option value="" selected hidden="hidden">Select a program</option>
-                        <?php
-                        foreach ($programs as $program) {
-                            echo "<option value='" . htmlspecialchars($program['ProgramKey']) . "'";
-                            if ($selectedProgramKey == $program['ProgramKey']) {
-                                echo " selected";
+            <div class="gridParent">
+                <div class="programSelector">
+                    <h2>Program Courses Management</h2>
+                    <form id="programForm">
+                        <label for="program">Program:</label>
+                        <select id="program" name="program">
+                            <option value="" selected hidden="hidden">Select a program</option>
+                            <?php
+                            foreach ($programs as $program) {
+                                echo "<option value='" . htmlspecialchars($program['ProgramKey']) . "'";
+                                if ($selectedProgramKey == $program['ProgramKey']) {
+                                    echo " selected";
+                                }
+                                echo ">" . htmlspecialchars($program['ProgramName']) . "</option>";
                             }
-                            echo ">" . htmlspecialchars($program['ProgramName']) . "</option>";
-                        }
-                        ?>
-                    </select>
-                    <button id="programSelectorButton">Select</button>
-                    <button id="resetButton">Reset</button>
-                </form>
-            </div>
-            <div class="coursesTable">
-                <table>
-                    <thead>
+                            ?>
+                        </select>
+                        <button id="programSelectorButton">Select</button>
+                        <button id="resetButton">Reset</button>
+                    </form>
+                </div>
+                <div class="coursesTable">
+                    <h2>Available Courses</h2>
+                    <table>
+                        <thead>
                         <tr>
                             <th hidden="hidden">Course ID</th>
                             <th>Course Key</th>
                             <th>Course Name</th>
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                    <?php
-                    if (!$selectedProgramKey) {
-                        echo '<tbody hidden="hidden">';
-                    } else {
-                        echo '<tbody>';
-                    }
-                    ?>
-                    <!-- Display courses that are not in the selected program -->
-                    <?php
-                    foreach ($courses as $course) {
-                        $isCourseInProgram = false;
-                        foreach ($programCourses as $programCourse) {
-                            if ($programCourse['CourseKey'] == $course['CourseKey']) {
-                                $isCourseInProgram = true;
-                                break;
+                        </thead>
+                        <?php
+                        if (!$selectedProgramKey) {
+                            echo '<tbody hidden="hidden">';
+                        } else {
+                            echo '<tbody>';
+                        }
+                        ?>
+                        <!-- Display courses that are not in the selected program -->
+                        <?php
+                        foreach ($courses as $course) {
+                            $isCourseInProgram = false;
+                            foreach ($programCourses as $programCourse) {
+                                if ($programCourse['CourseKey'] == $course['CourseKey']) {
+                                    $isCourseInProgram = true;
+                                    break;
+                                }
+                            }
+                            if (!$isCourseInProgram) {
+                                echo '<tr>';
+                                echo '<td hidden="hidden">' . $course['CourseID'] . '</td>';
+                                echo '<td>' . $course['CourseKey'] . '</td>';
+                                echo '<td>' . $course['CourseName'] . '</td>';
+                                ?>
+                                <td>
+                                    <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                                        <input type="hidden" name="programKey" value="<?php echo $selectedProgramKey; ?>">
+                                        <input type="hidden" name="courseKey" value="<?php echo $course['CourseKey']; ?>">
+                                        <button type="submit" name="addCourse" class="addButton">Add</button>
+                                    </form>
+                                </td>
+                                <?php
+                                echo '</tr>';
                             }
                         }
-                        if (!$isCourseInProgram) {
-                            echo '<tr>';
-                            echo '<td hidden="hidden">' . $course['CourseID'] . '</td>';
-                            echo '<td>' . $course['CourseKey'] . '</td>';
-                            echo '<td>' . $course['CourseName'] . '</td>';
-                            ?>
-                            <td>
-                                <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                                    <input type="hidden" name="programKey" value="<?php echo $selectedProgramKey; ?>">
-                                    <input type="hidden" name="courseKey" value="<?php echo $course['CourseKey']; ?>">
-                                    <button type="submit" name="addCourse" class="addButton">Add</button>
-                                </form>
-                            </td>
-                            <?php
-                            echo '</tr>';
-                        }
-                    }
-                    ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="selectedProgram" hidden="hidden">
-                <table>
-                    <thead>
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="selectedProgram" hidden="hidden">
+                    <table>
+                        <thead>
                         <tr>
                             <th hidden="hidden">Program ID</th>
                             <th>Program Key</th>
                             <th>Program Name</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Display selected program -->
-                    <?php
-                    foreach ($programs as $program) {
-                        if ($program['ProgramKey'] == $selectedProgramKey) {
-                            echo '<tr>';
-                            echo '<td hidden="hidden">' . $program['ProgramID'] . '</td>';
-                            echo '<td>' . $program['ProgramKey'] . '</td>';
-                            echo '<td>' . $program['ProgramName'] . '</td>';
-                            echo '</tr>';
+                        </thead>
+                        <tbody>
+                        <!-- Display selected program -->
+                        <?php
+                        foreach ($programs as $program) {
+                            if ($program['ProgramKey'] == $selectedProgramKey) {
+                                echo '<tr>';
+                                echo '<td hidden="hidden">' . $program['ProgramID'] . '</td>';
+                                echo '<td>' . $program['ProgramKey'] . '</td>';
+                                echo '<td>' . $program['ProgramName'] . '</td>';
+                                echo '</tr>';
+                            }
                         }
-                    }
-                    ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="addedCourses">
-                <table>
-                    <thead>
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="addedCourses">
+                    <h2>Assigned Courses</h2>
+                    <table>
+                        <thead>
                         <tr>
                             <th hidden="hidden">Course ID</th>
                             <th>Course Key</th>
                             <th>Course Name</th>
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Display courses that are in the selected program -->
-                    <?php
-                    foreach ($courses as $course) {
-                        $isCourseInProgram = false;
-                        foreach ($programCourses as $programCourse) {
-                            if ($programCourse['CourseKey'] == $course['CourseKey']) {
-                                $isCourseInProgram = true;
-                                break;
+                        </thead>
+                        <tbody>
+                        <!-- Display courses that are in the selected program -->
+                        <?php
+                        foreach ($courses as $course) {
+                            $isCourseInProgram = false;
+                            foreach ($programCourses as $programCourse) {
+                                if ($programCourse['CourseKey'] == $course['CourseKey']) {
+                                    $isCourseInProgram = true;
+                                    break;
+                                }
+                            }
+                            if ($isCourseInProgram) {
+                                echo '<tr>';
+                                echo '<td hidden="hidden">' . $course['CourseID'] . '</td>';
+                                echo '<td>' . $course['CourseKey'] . '</td>';
+                                echo '<td>' . $course['CourseName'] . '</td>';
+                                ?>
+                                <td>
+                                    <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                                        <input type="hidden" name="programKey" value="<?php echo $selectedProgramKey; ?>">
+                                        <input type="hidden" name="courseKey" value="<?php echo $course['CourseKey']; ?>">
+                                        <button type="submit" name="removeCourse" class="removeButton">Remove</button>
+                                    </form>
+                                </td>
+                                <?php
+                                echo '</tr>';
                             }
                         }
-                        if ($isCourseInProgram) {
-                            echo '<tr>';
-                            echo '<td hidden="hidden">' . $course['CourseID'] . '</td>';
-                            echo '<td>' . $course['CourseKey'] . '</td>';
-                            echo '<td>' . $course['CourseName'] . '</td>';
-                            ?>
-                            <td>
-                                <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                                    <input type="hidden" name="programKey" value="<?php echo $selectedProgramKey; ?>">
-                                    <input type="hidden" name="courseKey" value="<?php echo $course['CourseKey']; ?>">
-                                    <button type="submit" name="removeCourse" class="removeButton">Remove</button>
-                                </form>
-                            </td>
-                            <?php
-                            echo '</tr>';
-                        }
-                    }
-                    ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="programCoursesTable" hidden="hidden">
-                <table>
-                    <thead>
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="programCoursesTable" hidden="hidden">
+                    <table>
+                        <thead>
                         <tr>
                             <th hidden="hidden">Program Course ID</th>
                             <th>Program Key</th>
                             <th>Course Key</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($programCourses as $programCourse): ?>
-                        <tr>
-                            <td hidden="hidden"><?php echo $programCourse['ProgramCourseID']; ?></td>
-                            <td><?php echo $programCourse['ProgramKey']; ?></td>
-                            <td><?php echo $programCourse['CourseKey']; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($programCourses as $programCourse): ?>
+                            <tr>
+                                <td hidden="hidden"><?php echo $programCourse['ProgramCourseID']; ?></td>
+                                <td><?php echo $programCourse['ProgramKey']; ?></td>
+                                <td><?php echo $programCourse['CourseKey']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
