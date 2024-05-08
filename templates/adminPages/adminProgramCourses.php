@@ -156,7 +156,7 @@ function fetchAllRows($result) {
                 <form id="programForm">
                     <label for="program">Program:</label>
                     <select id="program" name="program">
-                        <option value="hide" selected hidden="hidden">Select a program</option>
+                        <option value="" selected hidden="hidden">Select a program</option>
                         <?php
                         foreach ($programs as $program) {
                             echo "<option value='" . htmlspecialchars($program['ProgramKey']) . "'";
@@ -168,6 +168,7 @@ function fetchAllRows($result) {
                         ?>
                     </select>
                     <button id="programSelectorButton">Select</button>
+                    <button id="resetButton">Reset</button>
                 </form>
             </div>
             <div class="coursesTable">
@@ -311,11 +312,5 @@ function fetchAllRows($result) {
         <p>&copy; 2024 Inter CurricuLab</p>
     </footer>
     <script src="../../static/js/adminProgramCourses.js"></script>
-    <script>
-        document.getElementById('programSelectorButton').addEventListener('click', function() {
-            const selectedProgramKey = document.getElementById('program').value;
-            window.location.href = window.location.pathname + '?program=' + selectedProgramKey;
-        });
-    </script>
 </body>
 </html>

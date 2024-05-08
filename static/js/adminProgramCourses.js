@@ -26,3 +26,13 @@ window.onclick = function(event) {
         }
     }
 }
+
+document.getElementById('programSelectorButton').addEventListener('click', function() {
+    const selectedProgramKey = document.getElementById('program').value;
+    window.location.href = window.location.pathname + '?program=' + selectedProgramKey;
+});
+
+document.getElementById('resetButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the form from submitting
+    window.location.href = window.location.pathname; // Redirect to the current page without query parameters
+});
