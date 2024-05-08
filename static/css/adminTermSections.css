@@ -1,0 +1,199 @@
+/* Container */
+/* Make container full height from header to footer */
+#container { display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+    flex-grow: 1;
+}
+
+.container-upperBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 1;
+}
+
+/* Grid */
+
+.gridParent {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) 0.2fr repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 0;
+    grid-row-gap: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.termSelector {
+    grid-area: 1 / 2 / 3 / 5;
+}
+
+.sectionsTable {
+    grid-area: 3 / 1 / 5 / 3;
+}
+
+.addedSections {
+    grid-area: 3 / 4 / 5 / 6;
+}
+
+/* Form */
+
+.termSelector {
+    display: flex;
+    align-content: center;
+    text-align: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.termSelector h2 {
+    margin: 10px 0;
+    font-size: 1.5em;
+}
+
+#termForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    flex-grow: 1;
+}
+
+#termForm label {
+    margin: 10px 0;
+}
+
+#termForm select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#termForm #termSelectorButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#termForm #termSelectorButton:hover {
+    background-color: #45a049;
+}
+
+#termForm #resetButton {
+    background-color: #f44336;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#termForm #resetButton:hover {
+    background-color: #f44336;
+}
+
+/* Available Sections */
+
+.sectionsTable {
+    display: flex;
+    flex-direction: column;
+    border-collapse: collapse;
+    margin: 20px;
+}
+
+.sectionsTable th {
+    background-color: #f2f2f2;
+}
+
+.sectionsTable th, .sectionsTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.sectionsTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.sectionsTable tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Buttons */
+
+.addButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.addButton:hover {
+    background-color: #45a049;
+}
+
+/* Added Course Table */
+
+.addedSections {
+    display: flex;
+    flex-direction: column;
+    border-collapse: collapse;
+    margin: 20px;
+}
+
+.addedSections th {
+    background-color: #f2f2f2;
+}
+
+.addedSections th, .addedSections td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.addedSections tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.addedSections tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Buttons */
+
+.removeButton {
+    background-color: #f44336;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.removeButton:hover {
+    background-color: #f44336;
+}
