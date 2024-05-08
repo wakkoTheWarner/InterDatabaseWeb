@@ -125,6 +125,7 @@ function fetchAllRows($result) {
                     <a href="adminSection.php">Section</a>
                 </div>
             </div>
+            <a href="#">Program/Courses</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">
@@ -136,12 +137,8 @@ function fetchAllRows($result) {
             <div id="userDropdown" class="dropdownContent">
                 <a href="#">Profile</a>
                 <?php
-                foreach ($programs as $program) {
-                    echo "<option value='" . htmlspecialchars($program['ProgramKey']) . "'";
-                    if ($selectedProgramKey == $program['ProgramKey']) {
-                        echo " selected";
-                    }
-                    echo ">" . htmlspecialchars($program['ProgramName']) . "</option>";
+                if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
+                    echo '<a href="adminLogger.php">Logger</a>';
                 }
                 ?>
                 <a href="adminUsers.php">Users</a>
