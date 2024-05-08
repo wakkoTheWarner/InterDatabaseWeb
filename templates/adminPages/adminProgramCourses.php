@@ -25,6 +25,9 @@ if (!isset($_SESSION['email'])) {
         $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
     }
 
+    // Clean up programCourses table
+    cleanUpProgramCourses($db);
+
     // Query for course table
     $queryCourse = "SELECT * FROM course";
     $stmtCourse = $db->prepare($queryCourse);
@@ -71,9 +74,9 @@ if (!isset($_SESSION['email'])) {
 
 function logAction($action) {
     // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
-    // Log format: [timestamp] [email] [action]
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
     $log = fopen('../../backend/log/log.txt', 'a');
-    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
     fclose($log);
 }
 
@@ -110,6 +113,39 @@ function fetchAllRows($result) {
     }
     return $rows;
 }
+
+function cleanUpProgramCourses($db) {
+    // Get all programCourses
+    $queryProgramCourses = "SELECT * FROM programCourses";
+    $stmtProgramCourses = $db->prepare($queryProgramCourses);
+    $resultProgramCourses = $stmtProgramCourses->execute();
+    $programCourses = fetchAllRows($resultProgramCourses);
+
+    foreach ($programCourses as $programCourse) {
+        // Check if program exists
+        $queryProgram = "SELECT * FROM program WHERE ProgramKey = :programKey";
+        $stmtProgram = $db->prepare($queryProgram);
+        $stmtProgram->bindValue(':programKey', $programCourse['ProgramKey'], SQLITE3_TEXT);
+        $resultProgram = $stmtProgram->execute();
+        $program = fetchAllRows($resultProgram);
+
+        // Check if course exists
+        $queryCourse = "SELECT * FROM course WHERE CourseKey = :courseKey";
+        $stmtCourse = $db->prepare($queryCourse);
+        $stmtCourse->bindValue(':courseKey', $programCourse['CourseKey'], SQLITE3_TEXT);
+        $resultCourse = $stmtCourse->execute();
+        $course = fetchAllRows($resultCourse);
+
+        // If program or course doesn't exist, delete from programCourses
+        if (empty($program) || empty($course)) {
+            $queryDelete = "DELETE FROM programCourses WHERE ProgramKey = :programKey AND CourseKey = :courseKey";
+            $stmtDelete = $db->prepare($queryDelete);
+            $stmtDelete->bindValue(':programKey', $programCourse['ProgramKey'], SQLITE3_TEXT);
+            $stmtDelete->bindValue(':courseKey', $programCourse['CourseKey'], SQLITE3_TEXT);
+            $stmtDelete->execute();
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,7 +165,7 @@ function fetchAllRows($result) {
         <nav>
             <a href="adminDashboard.php">Dashboard</a>
             <a href="adminTerms.php">Terms</a>
-            <a href="#">Programs</a>
+            <a href="adminPrograms.php">Programs</a>
             <div class="dropdown">
                 <a href="adminCourses.php">Courses</a>
                 <div class="dropdownContent">
@@ -137,6 +173,7 @@ function fetchAllRows($result) {
                     <a href="adminSection.php">Section</a>
                 </div>
             </div>
+            <a class="navDivider"></a>
             <a href="#">Program/Courses</a>
         </nav>
         <div class="userBox">

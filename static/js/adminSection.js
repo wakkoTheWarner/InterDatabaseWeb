@@ -53,7 +53,7 @@ for (let i = 0; i < btns.length; i++) {
         let sectionIDField = form.querySelector('input[name="updateSectionID"]');
         let sectionKeyField = form.querySelector('input[name="updateSectionKey"]');
         let courseKeyField = form.querySelector('select[name="updateCourseKey"]');
-        let professorEmailField = form.querySelector('select[name="updateProfessorEmail"]');
+        let professorEmailField = form.querySelector('input[name="updateProfessorEmail"]');
 
         // Populate the form fields with the data
         sectionIDField.value = sectionID;

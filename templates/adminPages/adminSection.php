@@ -21,6 +21,9 @@ if (!isset($_SESSION['email'])) {
         $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
     }
 
+    // Clean up sections that do not have a course key
+    $error = cleanUpSection();
+
     $stmt = $db->prepare('SELECT * FROM section');
     $result = $stmt->execute();
     $sections = $result->fetchArray(SQLITE3_ASSOC);
@@ -47,9 +50,9 @@ if (!isset($_SESSION['email'])) {
 
 function logAction($action) {
     // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
-    // Log format: [timestamp] [email] [action]
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
     $log = fopen('../../backend/log/log.txt', 'a');
-    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
     fclose($log);
 }
 
@@ -125,6 +128,45 @@ function fetchAllRows($result) {
     }
     return $rows;
 }
+
+function cleanUpSection() {
+    // count number of courses that do not have a competency
+    $counter = 0;
+
+    // Check all sections to see if they have a course key that is not in the course table
+    global $db;
+    $stmt = $db->prepare('SELECT * FROM section');
+    $result = $stmt->execute();
+    $sections = fetchAllRows($result);
+
+    foreach ($sections as $section) {
+        $stmt = $db->prepare('SELECT * FROM course WHERE CourseKey = :courseKey');
+        $stmt->bindValue(':courseKey', $section['CourseKey'], SQLITE3_TEXT);
+        $result = $stmt->execute();
+        $course = $result->fetchArray(SQLITE3_ASSOC);
+
+        if (!$course) {
+            if ($section['CourseKey'] !== null) {
+                $stmt = $db->prepare('UPDATE section SET CourseKey = :courseKey WHERE SectionID = :sectionID');
+                $stmt->bindValue(':sectionID', $section['SectionID'], SQLITE3_INTEGER);
+                $stmt->execute();
+            }
+
+            $counter++;
+        }
+    }
+
+    // Generate error message if there are courses without a competency
+    if ($counter > 0) {
+        // if more than 1 course does not have a competency, display plural message
+        if ($counter > 1) {
+            return $counter . ' sections do not have a course key. Please assign a course key to each section.';
+        } else {
+            return $counter . ' section does not have a course key. Please assign a course key to each section.';
+        }
+    }
+    return null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -153,6 +195,7 @@ function fetchAllRows($result) {
                     <a href="#">Section</a>
                 </div>
             </div>
+            <a class="navDivider"></a>
             <a href="adminProgramCourses.php">Program/Courses</a>
         </nav>
         <div class="userBox">
@@ -182,6 +225,13 @@ function fetchAllRows($result) {
                         <p><?php echo htmlspecialchars($_GET['error']); ?></p>
                     </div>
                 <?php endif; ?>
+                <?php
+                if ($error !== null) {
+                    echo '<div class="error">';
+                    echo '<p>' . htmlspecialchars($error) . '</p>';
+                    echo '</div>';
+                }
+                ?>
                 <div class="header">
                     <h2>Sections Manager</h2>
                 </div>
@@ -206,16 +256,7 @@ function fetchAllRows($result) {
                         </div>
                         <div class="inputBox">
                             <label for="professorEmail">Professor Email:</label>
-                            <select name="professorEmail" id="professorEmail">
-                                <option value="" hidden="hidden" selected>Select Professor Email</option>
-                                <?php
-                                $stmt = $db->prepare('SELECT Email FROM user WHERE AccountType = "Professor"');
-                                $result = $stmt->execute();
-                                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($row['Email']) . '">' . htmlspecialchars($row['Email']) . '</option>';
-                                }
-                                ?>
-                            </select>
+                            <input type="email" name="professorEmail" id="professorEmail" placeholder="Professor Email" required>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Add Section</button>
@@ -314,16 +355,7 @@ function fetchAllRows($result) {
                         </div>
                         <div class="inputBox">
                             <label for="updateProfessorEmail">Professor Email:</label>
-                            <select name="updateProfessorEmail" id="updateProfessorEmail">
-                                <option value="" hidden="hidden" selected>Select Professor Email</option>
-                                <?php
-                                $stmt = $db->prepare('SELECT Email FROM user WHERE AccountType = "Professor"');
-                                $result = $stmt->execute();
-                                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($row['Email']) . '">' . htmlspecialchars($row['Email']) . '</option>';
-                                }
-                                ?>
-                            </select>
+                            <input type="email" name="updateProfessorEmail" id="updateProfessorEmail" placeholder="Professor Email" required>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Update Section</button>

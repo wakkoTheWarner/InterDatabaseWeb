@@ -21,6 +21,9 @@ if (!isset($_SESSION['email'])) {
         $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
     }
 
+    // Clean up courses by checking if competency exists in the competency table
+    $error = cleanUpCourses();
+
     $stmt = $db->prepare('SELECT * FROM course');
     $result = $stmt->execute();
     $courses = $result->fetchArray(SQLITE3_ASSOC);
@@ -47,9 +50,9 @@ if (!isset($_SESSION['email'])) {
 
 function logAction($action) {
     // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
-    // Log format: [timestamp] [email] [action]
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
     $log = fopen('../../backend/log/log.txt', 'a');
-    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
     fclose($log);
 }
 
@@ -130,6 +133,45 @@ function fetchAllRows($result) {
     }
     return $rows;
 }
+
+function cleanUpCourses() {
+    // count number of courses that do not have a competency
+    $counter = 0;
+
+    // Check all courses and make competency null if it does not exist in the competency table
+    global $db;
+    $stmt = $db->prepare('SELECT * FROM course');
+    $result = $stmt->execute();
+    $courses = fetchAllRows($result);
+
+    foreach ($courses as $course) {
+        $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyKey = :competencyKey');
+        $stmt->bindValue(':competencyKey', $course['CompetencyKey'], SQLITE3_TEXT);
+        $result = $stmt->execute();
+        $competency = $result->fetchArray(SQLITE3_ASSOC);
+
+        if (!$competency) {
+            if ($course['CompetencyKey'] !== null) {
+                $stmt = $db->prepare('UPDATE course SET CompetencyKey = NULL WHERE CourseID = :courseID');
+                $stmt->bindValue(':courseID', $course['CourseID'], SQLITE3_INTEGER);
+                $stmt->execute();
+            }
+
+            $counter++;
+        }
+    }
+
+    // Generate error message if there are courses without a competency
+    if ($counter > 0) {
+        // if more than 1 course does not have a competency, display plural message
+        if ($counter > 1) {
+            return 'There are ' . $counter . ' courses that do not have a competency. Please assign a competency to each course.';
+        } else {
+            return 'There is ' . $counter . ' course that does not have a competency. Please assign a competency to each course.';
+        }
+    }
+    return null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -158,6 +200,7 @@ function fetchAllRows($result) {
                     <a href="adminSection.php">Section</a>
                 </div>
             </div>
+            <a class="navDivider"></a>
             <a href="adminProgramCourses.php">Program/Courses</a>
         </nav>
         <div class="userBox">
@@ -187,6 +230,13 @@ function fetchAllRows($result) {
                         <p><?php echo htmlspecialchars($_GET['error']); ?></p>
                     </div>
                 <?php endif; ?>
+                <?php
+                if ($error !== null) {
+                    echo '<div class="error">';
+                    echo '<p>' . htmlspecialchars($error) . '</p>';
+                    echo '</div>';
+                }
+                ?>
                 <div class="header">
                     <h2>Courses Manager</h2>
                 </div>

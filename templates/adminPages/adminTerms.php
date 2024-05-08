@@ -47,9 +47,9 @@ if (!isset($_SESSION['email'])) {
 
 function logAction($action) {
     // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
-    // Log format: [timestamp] [email] [action]
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
     $log = fopen('../../backend/log/log.txt', 'a');
-    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
     fclose($log);
 }
 
@@ -155,6 +155,7 @@ function fetchAllRows($result) {
                     <a href="adminSection.php">Section</a>
                 </div>
             </div>
+            <a class="navDivider"></a>
             <a href="adminProgramCourses.php">Program/Courses</a>
         </nav>
         <div class="userBox">

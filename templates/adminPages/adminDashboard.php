@@ -34,6 +34,7 @@ if (!isset($_SESSION['email'])) {
                     <a href="adminSection.php">Section</a>
                 </div>
             </div>
+            <a class="navDivider"></a>
             <a href="adminProgramCourses.php">Program/Courses</a>
         </nav>
         <div class="userBox">
