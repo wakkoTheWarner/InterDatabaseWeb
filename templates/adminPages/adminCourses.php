@@ -195,7 +195,7 @@ function cleanUpCourses() {
             <a href="adminPrograms.php">Programs</a>
             <div class="dropdown">
                 <a href="#">Courses</a>
-                <div class="dropdownContent">
+                <div class="navDropdownContent">
                     <a href="adminCompetency.php">Competencies</a>
                     <a href="adminSection.php">Section</a>
                 </div>

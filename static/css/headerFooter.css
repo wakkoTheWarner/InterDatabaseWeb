@@ -46,6 +46,35 @@ nav a:hover:not(.navDivider) {
     padding: 30px 0;
 }
 
+.navDropdownContent {
+    display: none;
+    position: absolute;
+    /* background-color is white */
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.navDropdownContent a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    border-radius: 5px 5px 0 0;
+}
+
+.navDropdownContent a:hover {
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+.dropdown:hover .navDropdownContent {
+    display: block;
+}
+
 /* User Box */
 
 .userBox {
