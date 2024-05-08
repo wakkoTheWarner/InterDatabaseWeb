@@ -69,6 +69,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log format: [timestamp] [email] [action]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] ' . $_SESSION['email'] . '  ' . $action . PHP_EOL);
+    fclose($log);
+}
+
 function addCourse($db) {
     $programKey = $_POST['programKey'];
     $courseKey = $_POST['courseKey'];
@@ -78,6 +86,8 @@ function addCourse($db) {
     $stmt->bindValue(':programKey', $programKey, SQLITE3_TEXT);
     $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
     $stmt->execute();
+
+    logAction('Added course ' . $courseKey . ' to program ' . $programKey);
 }
 
 function removeCourse($db) {
@@ -89,6 +99,8 @@ function removeCourse($db) {
     $stmt->bindValue(':programKey', $programKey, SQLITE3_TEXT);
     $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
     $stmt->execute();
+
+    logAction('Removed course ' . $courseKey . ' from program ' . $programKey);
 }
 
 function fetchAllRows($result) {
