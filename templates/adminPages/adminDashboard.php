@@ -36,6 +36,7 @@ if (!isset($_SESSION['email'])) {
             </div>
             <a class="navDivider"></a>
             <a href="adminProgramCourses.php">Program/Courses</a>
+            <a href="adminTermCourses.php" class="active">Term/Courses</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">

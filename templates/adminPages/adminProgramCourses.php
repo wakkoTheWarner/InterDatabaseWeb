@@ -175,6 +175,7 @@ function cleanUpProgramCourses($db) {
             </div>
             <a class="navDivider"></a>
             <a href="#">Program/Courses</a>
+            <a href="adminTermCourses.php" class="active">Term/Courses</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">

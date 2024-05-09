@@ -26,3 +26,15 @@ window.onclick = function(event) {
         }
     }
 }
+
+document.getElementById('termSelectorButton').addEventListener('click', function() {
+    const selectedTermKey = document.getElementById('term').value;
+    window.location.href = window.location.pathname + '?term=' + selectedTermKey;
+});
+
+document.getElementById('resetButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the form from submitting
+    window.location.href = window.location.pathname; // Redirect to the current page without query parameters
+});
+
+// Modal
