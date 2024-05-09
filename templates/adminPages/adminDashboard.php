@@ -58,6 +58,9 @@ if (!isset($_SESSION['email'])) {
         </div>
     </div>
     <div id="container">
+        <div class="container-upperBox">
+            <!-- button so that when user clicks, creates a csv file -->
+        </div>
     </div>
     <script>
         document.getElementById('logout').addEventListener('click', function() {

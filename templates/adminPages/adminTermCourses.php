@@ -39,6 +39,12 @@ if (!isset($_SESSION['email'])) {
     $resultTerm = $stmtTerm->execute();
     $terms = fetchAllRows($resultTerm);
 
+    // query for section table
+    $querySection = "SELECT * FROM section";
+    $stmtSection = $db->prepare($querySection);
+    $resultSection = $stmtSection->execute();
+    $sections = fetchAllRows($resultSection);
+
     // query for term course table
     $queryTermCourse = "SELECT * FROM termCourses";
     $stmtTermCourse = $db->prepare($queryTermCourse);
@@ -298,6 +304,22 @@ function cleanUpTermCourses($db) {
                         </tbody>
                     </table>
                 </div>
+                <?php
+                // check recently added course if CourseKey appears in section table
+                foreach ($termCourses as $termCourse) {
+                    $query = "SELECT * FROM section WHERE CourseKey = :courseKey";
+                    $stmt = $db->prepare($query);
+                    $stmt->bindValue(':courseKey', $termCourse['CourseKey'], SQLITE3_TEXT);
+                    $result = $stmt->execute();
+                    $section = $result->fetchArray(SQLITE3_ASSOC);
+
+                    if ($section) {
+                        echo '<div class="warningBox">';
+                        echo '<p>Warning: Course ' . $termCourse['CourseKey'] . ' is in a section. Please remove course from section before removing from term.</p>';
+                        echo '</div>';
+                    }
+                }
+                ?>
             </div>
         </div>
     </div>
