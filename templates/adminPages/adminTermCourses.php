@@ -39,12 +39,6 @@ if (!isset($_SESSION['email'])) {
     $resultTerm = $stmtTerm->execute();
     $terms = fetchAllRows($resultTerm);
 
-    // query for section table
-    $querySection = "SELECT * FROM section";
-    $stmtSection = $db->prepare($querySection);
-    $resultSection = $stmtSection->execute();
-    $sections = fetchAllRows($resultSection);
-
     // query for term course table
     $queryTermCourse = "SELECT * FROM termCourses";
     $stmtTermCourse = $db->prepare($queryTermCourse);
@@ -274,7 +268,6 @@ function cleanUpTermCourses($db) {
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Display courses that are in the selected program -->
                             <?php
                             foreach ($courses as $course) {
                                 $isCourseInTerm = false;
@@ -302,21 +295,6 @@ function cleanUpTermCourses($db) {
                                 }
                             }
                             ?>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="termCoursesTable" hidden="hidden">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th hidden="hidden">Term Course ID</th>
-                                <th>Course Key</th>
-                                <th>Course Name</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Display courses that are in the selected program -->
                         </tbody>
                     </table>
                 </div>
