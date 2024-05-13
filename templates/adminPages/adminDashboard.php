@@ -5,6 +5,10 @@ session_start();
 if (!isset($_SESSION['email'])) {
     header('Location: ../index.php');
     exit;
+} elseif ($_SESSION['accountType'] !== 'Admin' && $_SESSION['accountType'] !== 'Root' && $_SESSION['accountType'] !== 'Staff') {
+    header('Location: ../staffPages/profPage.php');
+    exit;
+} else {
 }
 ?>
 
@@ -46,7 +50,7 @@ if (!isset($_SESSION['email'])) {
                 ?>
             </button>
             <div id="userDropdown" class="dropdownContent">
-                <a href="#">Profile</a>
+                <a href="adminProfile.php">Profile</a>
                 <?php
                 if ($_SESSION['accountType'] === 'Admin' || $_SESSION['accountType'] === 'Root') {
                     echo '<a href="adminLogger.php">Logger</a>';

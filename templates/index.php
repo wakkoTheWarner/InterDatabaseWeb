@@ -36,6 +36,7 @@ if (!empty($_POST)) {
 
     if ($user && password_verify($password, $user['Password'])) {
         session_regenerate_id();
+        $_SESSION['userID'] = $user['UserID'];
         $_SESSION['email'] = $user['Email'];
         $_SESSION['firstName'] = $user['FirstName'];
         $_SESSION['lastName'] = $user['LastName'];

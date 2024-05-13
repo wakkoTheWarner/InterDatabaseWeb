@@ -27,7 +27,7 @@ if (!isset($_SESSION['email'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Professor Dashboard</title>
     <link rel="stylesheet" href="../../static/css/headerFooter.css">
     <link rel="stylesheet" href="../../static/css/profPage.css">
 </head>
@@ -49,8 +49,7 @@ if (!isset($_SESSION['email'])) {
                 ?>
             </button>
             <div id="userDropdown" class="dropdownContent">
-                <a href="#">Profile</a>
-                <a href="#">Settings</a>
+                <a href="profProfile.php">Profile</a>
                 <a id="logout">Log Out</a>
             </div>
         </div>

@@ -43,3 +43,7 @@
 [2024-05-13 21:17:31] [INFO] root@localhost - Added course COMP 2120 to term 202510 - Success
 [2024-05-13 21:17:34] [INFO] root@localhost - Added course TEST 1111 to term 202510 - Success
 [2024-05-13 21:17:35] [INFO] root@localhost - Removed course TEST 1111 from term 202510 - Success
+[2024-05-13 23:10:22] [INFO] eduardo5282@interfajardo.edu - Updated account: eduardo5282@interfajardo.edu - Success
+[2024-05-13 23:10:33] [INFO] eduardo5282@interfajardo.edu - Updated account: eduardo5282@interfajardo.edu - Success
+[2024-05-13 23:12:00] [INFO] professor@account - Updated account: professor@account - Success
+[2024-05-13 23:12:12] [INFO] professor@account - Updated account: professor@account - Success

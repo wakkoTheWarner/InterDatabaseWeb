@@ -13,8 +13,8 @@ session_start();
 if (!isset($_SESSION['email'])) {
     header('Location: ../index.php');
     exit;
-} elseif ($_SESSION['accountType'] !== 'Admin' && $_SESSION['accountType'] !== 'Root' && $_SESSION['accountType'] !== 'Staff') {
-    header('Location: ../staffPages/profPage.php');
+} elseif ($_SESSION['accountType'] !== 'Professor') {
+    header('Location: ../adminPages/adminProfile.php');
     exit;
 } else {
     if ($config['db']['type'] === 'sqlite') {
@@ -75,7 +75,6 @@ function updateUser() {
             $_SESSION['lastName'] = $lastName;
 
             logAction('Updated account: ' . $_POST['email']);
-
         } elseif ($password === '' && $confirmPassword === '') {
             $stmt = $db->prepare('UPDATE user SET Email = :email, FirstName = :firstName, LastName = :lastName WHERE user.UserID = :userID');
             $stmt->bindValue(':email', $email, SQLITE3_TEXT);
@@ -108,31 +107,19 @@ function fetchAllRows($result) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Admin Profile</title>
+    <title>Professor Profile</title>
     <link rel="stylesheet" type="text/css" href="../../static/css/headerFooter.css">
     <link rel="stylesheet" type="text/css" href="../../static/css/adminProfile.css">
 </head>
 <body>
     <div id="headerNav">
         <div class="logo">
-            <a href="adminDashboard.php">
+            <a href="profPage.php">
                 <img src="../../static/img/inter-logo-full.png" alt="Inter CurricuLab">
             </a>
         </div>
         <nav>
-            <a href="adminDashboard.php">Dashboard</a>
-            <a href="adminTerms.php">Terms</a>
-            <a href="adminPrograms.php">Programs</a>
-            <div class="dropdown">
-                <a href="adminCourses.php">Courses</a>
-                <div class="navDropdownContent">
-                    <a href="adminCompetency.php">Competencies</a>
-                    <a href="adminSection.php">Section</a>
-                </div>
-            </div>
-            <a class="navDivider"></a>
-            <a href="adminProgramCourses.php">Program/Courses</a>
-            <a href="adminTermCourses.php" class="active">Term/Courses</a>
+            <a href="profPage.php">Dashboard</a>
         </nav>
         <div class="userBox">
             <button onclick="myFunction()" class="userDropdownButton">
@@ -142,9 +129,7 @@ function fetchAllRows($result) {
                 ?>
             </button>
             <div id="userDropdown" class="dropdownContent">
-                <a href="adminProfile.php">Profile</a>
-                <a href="adminLogger.php">Logger</a>
-                <a href="adminUsers.php">Users</a>
+                <a href="#">Profile</a>
                 <a id="logout">Log Out</a>
             </div>
         </div>
@@ -173,29 +158,29 @@ function fetchAllRows($result) {
                 echo '<p>Root user cannot be edited.</p>';
             } else {
                 ?>
-            <div class="userModification">
-                <div class="header">
-                    <h2>Modify User</h2>
+                <div class="userModification">
+                    <div class="header">
+                        <h2>Modify User</h2>
+                    </div>
+                    <form method="post">
+                        <label for="userID" hidden="hidden">User ID:</label><br>
+                        <input hidden="hidden" type="text" id="userID" name="userID" value="<?php echo $_SESSION['userID']; ?>" readonly><br>
+                        <label for="email">Email:</label><br>
+                        <input type="email" id="email" name="email" value="<?php echo $_SESSION['email']; ?>" required><br>
+                        <label for="firstName">First Name:</label><br>
+                        <input type="text" id="firstName" name="firstName" value="<?php echo $_SESSION['firstName']; ?>" required><br>
+                        <label for="lastName">Last Name:</label><br>
+                        <input type="text" id="lastName" name="lastName" value="<?php echo $_SESSION['lastName']; ?>" required><br>
+                        <label for="previousPassword">Previous Password:</label><br>
+                        <input type="password" id="previousPassword" name="previousPassword" required><br>
+                        <label for="password">Password:</label><br>
+                        <input type="password" id="password" name="password"><br>
+                        <label for="confirmPassword">Confirm Password:</label><br>
+                        <input type="password" id="confirmPassword" name="confirmPassword"><br>
+                        <input type="submit" value="Submit">
+                    </form>
                 </div>
-                <form method="post">
-                    <label for="userID" hidden="hidden">User ID:</label><br>
-                    <input hidden="hidden" type="text" id="userID" name="userID" value="<?php echo $_SESSION['userID']; ?>" readonly><br>
-                    <label for="email">Email:</label><br>
-                    <input type="email" id="email" name="email" value="<?php echo $_SESSION['email']; ?>" required><br>
-                    <label for="firstName">First Name:</label><br>
-                    <input type="text" id="firstName" name="firstName" value="<?php echo $_SESSION['firstName']; ?>" required><br>
-                    <label for="lastName">Last Name:</label><br>
-                    <input type="text" id="lastName" name="lastName" value="<?php echo $_SESSION['lastName']; ?>" required><br>
-                    <label for="previousPassword">Previous Password:</label><br>
-                    <input type="password" id="previousPassword" name="previousPassword" required><br>
-                    <label for="password">Password:</label><br>
-                    <input type="password" id="password" name="password"><br>
-                    <label for="confirmPassword">Confirm Password:</label><br>
-                    <input type="password" id="confirmPassword" name="confirmPassword"><br>
-                    <input type="submit" value="Submit">
-                </form>
-            </div>
-            <?php
+                <?php
             }
             ?>
         </div>

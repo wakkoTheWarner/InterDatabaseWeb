@@ -5,6 +5,9 @@ session_start();
 if (!isset($_SESSION['email'])) {
     header('Location: ../index.php');
     exit;
+} elseif ($_SESSION['accountType'] !== 'Root' && $_SESSION['accountType'] !== 'Admin') {
+    header('Location: adminDashboard.php');
+    exit;
 } else {
     // Open the log file
     $logFile = fopen('../../backend/log/log.txt', 'r');
@@ -61,7 +64,7 @@ if (!isset($_SESSION['email'])) {
                 ?>
             </button>
             <div id="userDropdown" class="dropdownContent">
-                <a href="#">Profile</a>
+                <a href="adminProfile.php">Profile</a>
                 <a href="#">Logger</a>
                 <a href="adminUsers.php">Users</a>
                 <a id="logout">Log Out</a>
