@@ -77,6 +77,14 @@ if (!isset($_SESSION['email'])) {
     }
 }
 
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
+    fclose($log);
+}
+
 function addCourse($db) {
     $termKey = $_POST['termKey'];
     $courseKey = $_POST['courseKey'];
@@ -86,6 +94,8 @@ function addCourse($db) {
     $stmt->bindValue(':termKey', $termKey, SQLITE3_TEXT);
     $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
     $stmt->execute();
+
+    logAction('Added course ' . $courseKey . ' to term ' . $termKey);
 }
 
 function removeCourse($db) {
@@ -97,6 +107,8 @@ function removeCourse($db) {
     $stmt->bindValue(':termKey', $termKey, SQLITE3_TEXT);
     $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
     $stmt->execute();
+
+    logAction('Removed course ' . $courseKey . ' from term ' . $termKey);
 }
 
 function fetchAllRows($result) {
@@ -192,7 +204,6 @@ function cleanUpTermCourses($db) {
     <div id="container">
         <div class="container-upperBox">
             <div class="gridParent">
-                <!-- 2 Buttons that will switch menus between Term Courses and Term Sections -->
                 <div class="termSelector">
                     <h2>Term Courses Management</h2>
                     <form id="termForm">
@@ -304,22 +315,6 @@ function cleanUpTermCourses($db) {
                         </tbody>
                     </table>
                 </div>
-                <?php
-                // check recently added course if CourseKey appears in section table
-                foreach ($termCourses as $termCourse) {
-                    $query = "SELECT * FROM section WHERE CourseKey = :courseKey";
-                    $stmt = $db->prepare($query);
-                    $stmt->bindValue(':courseKey', $termCourse['CourseKey'], SQLITE3_TEXT);
-                    $result = $stmt->execute();
-                    $section = $result->fetchArray(SQLITE3_ASSOC);
-
-                    if ($section) {
-                        echo '<div class="warningBox">';
-                        echo '<p>Warning: Course ' . $termCourse['CourseKey'] . ' is in a section. Please remove course from section before removing from term.</p>';
-                        echo '</div>';
-                    }
-                }
-                ?>
             </div>
         </div>
     </div>

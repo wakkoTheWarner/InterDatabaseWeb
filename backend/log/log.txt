@@ -39,3 +39,7 @@
 [2024-05-09 16:15:25] [INFO] root@localhost - Updated course: TEST 11112 - Success
 [2024-05-09 16:16:57] [INFO] root@localhost - Updated course: TEST 1111 - Success
 [2024-05-09 18:49:13] [INFO] root@localhost - Updated section: 202401 - Success
+[2024-05-13 21:17:28] [INFO] root@localhost - Removed course COMP 2120 from term 202510 - Success
+[2024-05-13 21:17:31] [INFO] root@localhost - Added course COMP 2120 to term 202510 - Success
+[2024-05-13 21:17:34] [INFO] root@localhost - Added course TEST 1111 to term 202510 - Success
+[2024-05-13 21:17:35] [INFO] root@localhost - Removed course TEST 1111 from term 202510 - Success
