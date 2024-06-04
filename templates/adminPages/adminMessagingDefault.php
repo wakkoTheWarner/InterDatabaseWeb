@@ -142,16 +142,18 @@ function fetchAllRows($result) {
                 // Loop through each row
                 foreach ($rows as $row) {
                     // Create a box with the conversation details
-                    echo '<a href="adminMessageConvo.php?sender=' . urlencode($row['SenderEmail']) . '&recipient=' . urlencode($row['RecipientEmail']) . '" class="message">';
+                    echo '<a href="adminMessagingConvo.php?sender=' . urlencode($row['SenderEmail']) . '&recipient=' . urlencode($row['RecipientEmail']) . '" class="message">';
                     echo '<div class="messageHeader">';
                     echo '<p hidden="hidden">' . $row['MessageID'] . '</p>';
                     echo '<p>From: ' . $row['SenderEmail'] . '</p>';
                     echo '<p>To: ' . $row['RecipientEmail'] . '</p>';
+                    echo '<p>Date: ' . $row['Timestamp'] . '</p>';
                     echo '</div>';
                     echo '<div class="messageContent">';
                     echo '<p>' . $row['Message'] . '</p>';
                     echo '</div>';
                     echo '</a>';
+                    echo '<br>';
                 }
                 ?>
             </div>
