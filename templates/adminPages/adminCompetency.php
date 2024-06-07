@@ -347,32 +347,32 @@ function fetchAllRows($result) {
                         }
                         ?>
                         <div class="inputBox">
-                            <label for="updateCompetencyDesc">Competency Name:</label>
-                            <textarea name="updateCompetencyDesc" id="updateCompetencyDesc" placeholder="Competency Description" required></textarea>
+                            <label for="updateCompetencyDesc">Competency Description:</label>
+                            <textarea name="updateCompetencyDesc" id="updateCompetencyDesc" placeholder="Competency Description"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateCompetencyMetric">Metric</label>
-                            <textarea name="updateCompetencyMetric" id="updateCompetencyMetric" placeholder="Competency Metric" required></textarea>
+                            <textarea name="updateCompetencyMetric" id="updateCompetencyMetric" placeholder="Competency Metric"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateMetricResult">Metric Result</label>
-                            <textarea name="updateMetricResult" id="updateMetricResult" placeholder="Metric Result" required></textarea>
+                            <textarea name="updateMetricResult" id="updateMetricResult" placeholder="Metric Result"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateStudentStrengths">Student Strengths</label>
-                            <textarea name="updateStudentStrengths" id="updateStudentStrengths" placeholder="Student Strengths" required></textarea>
+                            <textarea name="updateStudentStrengths" id="updateStudentStrengths" placeholder="Student Strengths"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateStudentWeaknesses">Student Weaknesses</label>
-                            <textarea name="updateStudentWeaknesses" id="updateStudentWeaknesses" placeholder="Student Weaknesses" required></textarea>
+                            <textarea name="updateStudentWeaknesses" id="updateStudentWeaknesses" placeholder="Student Weaknesses"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateRecommendations">Recommendations</label>
-                            <textarea name="updateRecommendations" id="updateRecommendations" placeholder="Recommendations" required></textarea>
+                            <textarea name="updateRecommendations" id="updateRecommendations" placeholder="Recommendations"></textarea>
                         </div>
                         <div class="inputBox">
                             <label for="updateEvaluationInstrument">Evaluation Instrument</label>
-                            <textarea name="updateEvaluationInstrument" id="updateEvaluationInstrument" placeholder="Evaluation Instrument" required></textarea>
+                            <textarea name="updateEvaluationInstrument" id="updateEvaluationInstrument" placeholder="Evaluation Instrument"></textarea>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Update Competency</button>

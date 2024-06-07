@@ -47,3 +47,7 @@
 [2024-05-13 23:10:33] [INFO] eduardo5282@interfajardo.edu - Updated account: eduardo5282@interfajardo.edu - Success
 [2024-05-13 23:12:00] [INFO] professor@account - Updated account: professor@account - Success
 [2024-05-13 23:12:12] [INFO] professor@account - Updated account: professor@account - Success
+[2024-06-07 22:16:03] [INFO] root@localhost - Updated competency: COMP - Success
+[2024-06-07 22:16:34] [INFO] root@localhost - Updated competency: COMP TEST - Success
+[2024-06-07 22:22:29] [INFO] root@localhost - Updated competency: COMP TEST - Success
+[2024-06-07 22:24:39] [INFO] root@localhost - Updated competency: COMP - Success
