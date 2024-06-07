@@ -5,15 +5,16 @@
 
 $config = require_once '../backend/php/config.php';
 
+ini_set('session.cookie_secure', '1');
+ini_set('session.cookie_httponly', '1');
+
 session_start([
     'cookie_lifetime' => 86400,
 ]);
 
-ini_set('session.cookie_secure', '1');
-ini_set('session.cookie_httponly', '1');
 if (!empty($_POST)) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-    $password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
+    $password = filter_var($_POST['password'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
     if ($config['db']['type'] === 'sqlite') {
         $db = new SQLite3($config['db']['sqlite']['path']);
