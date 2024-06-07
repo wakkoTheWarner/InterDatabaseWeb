@@ -46,17 +46,35 @@ for (let i = 0; i < btns.length; i++) {
         let competencyID = row.children[0].innerText;
         let competencyKey = row.children[1].innerText;
         let competencyDesc = row.children[2].innerText;
+        let competencyMetric = row.children[3].innerText;
+        let metricResult = row.children[4].innerText;
+        let studentStrengths = row.children[5].innerText;
+        let studentWeaknesses = row.children[6].innerText;
+        let recommendations = row.children[7].innerText;
+        let evaluationInstrument = row.children[8].innerText;
 
         // Get the form fields
         let form = document.querySelector('.competenciesFormUpdate form');
         let competencyIDField = form.querySelector('input[name="updateCompetencyID"]');
         let competencyKeyField = form.querySelector('input[name="updateCompetencyKey"]');
         let competencyDescField = form.querySelector('textarea[name="updateCompetencyDesc"]');
+        let competencyMetricField = form.querySelector('textarea[name="updateCompetencyMetric"]');
+        let metricResultField = form.querySelector('textarea[name="updateMetricResult"]');
+        let studentStrengthsField = form.querySelector('textarea[name="updateStudentStrengths"]');
+        let studentWeaknessesField = form.querySelector('textarea[name="updateStudentWeaknesses"]');
+        let recommendationsField = form.querySelector('textarea[name="updateRecommendations"]');
+        let evaluationInstrumentField = form.querySelector('textarea[name="updateEvaluationInstrument"]');
 
         // Populate the form fields with the data
         competencyIDField.value = competencyID;
         competencyKeyField.value = competencyKey;
         competencyDescField.value = competencyDesc;
+        competencyMetricField.value = competencyMetric;
+        metricResultField.value = metricResult;
+        studentStrengthsField.value = studentStrengths;
+        studentWeaknessesField.value = studentWeaknesses;
+        recommendationsField.value = recommendations;
+        evaluationInstrumentField.value = evaluationInstrument;
 
         // Show the modal
         modal.style.display = "block";

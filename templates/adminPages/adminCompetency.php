@@ -29,11 +29,11 @@ if (!isset($_SESSION['email'])) {
     $competencies = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['updateCompetencyID'], $_POST['updateCompetencyKey'], $_POST['updateCompetencyDesc'])) {
+        if (isset($_POST['updateCompetencyID'], $_POST['updateCompetencyKey'], $_POST['updateCompetencyDesc'], $_POST['updateCompetencyMetric'], $_POST['updateMetricResult'], $_POST['updateStudentStrengths'], $_POST['updateStudentWeaknesses'], $_POST['updateRecommendations'], $_POST['updateEvaluationInstrument'])) {
             updateCompetency();
         } elseif (isset($_POST['delete'])) {
             deleteCompetency();
-        } elseif (isset($_POST['competencyKey'], $_POST['competencyDesc'])) {
+        } elseif (isset($_POST['competencyKey'], $_POST['competencyDesc'], $_POST['competencyMetric'], $_POST['metricResult'], $_POST['studentStrengths'], $_POST['studentWeaknesses'], $_POST['recommendations'], $_POST['evaluationInstrument'])) {
             addCompetency();
         }
     }
@@ -58,9 +58,15 @@ function logAction($action) {
 
 function addCompetency() {
     global $db;
-    $stmt = $db->prepare('INSERT INTO competency (CompetencyKey, CompetencyDesc) VALUES (:competencyKey, :competencyDesc)');
+    $stmt = $db->prepare('INSERT INTO competency (CompetencyKey, CompetencyDesc, CompetencyMetric, MetricResult, StudentStrengths, StudentWeaknesses, Recommendations, EvaluationInstrument) VALUES (:competencyKey, :competencyDesc, :competencyMetric, :metricResult, :studentStrengths, :studentWeaknesses, :recommendations, :evaluationInstrument)');
     $stmt->bindValue(':competencyKey', $_POST['competencyKey'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyDesc', $_POST['competencyDesc'], SQLITE3_TEXT);
+    $stmt->bindValue(':competencyMetric', $_POST['competencyMetric'], SQLITE3_TEXT);
+    $stmt->bindValue(':metricResult', $_POST['metricResult'], SQLITE3_TEXT);
+    $stmt->bindValue(':studentStrengths', $_POST['studentStrengths'], SQLITE3_TEXT);
+    $stmt->bindValue(':studentWeaknesses', $_POST['studentWeaknesses'], SQLITE3_TEXT);
+    $stmt->bindValue(':recommendations', $_POST['recommendations'], SQLITE3_TEXT);
+    $stmt->bindValue(':evaluationInstrument', $_POST['evaluationInstrument'], SQLITE3_TEXT);
     $stmt->execute();
 
     // if user typed in competency key that already exists, display error message
@@ -75,10 +81,16 @@ function addCompetency() {
 
 function updateCompetency() {
     global $db;
-    $stmt = $db->prepare('UPDATE competency SET CompetencyKey = :competencyKey, CompetencyDesc = :competencyDesc WHERE CompetencyID = :competencyID');
+    $stmt = $db->prepare('UPDATE competency SET CompetencyKey = :competencyKey, CompetencyDesc = :competencyDesc, CompetencyMetric = :competencyMetric, MetricResult = :metricResult, StudentStrengths = :studentStrengths, StudentWeaknesses = :studentWeaknesses, Recommendations = :recommendations, EvaluationInstrument = :evaluationInstrument WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':competencyKey', $_POST['updateCompetencyKey'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyDesc', $_POST['updateCompetencyDesc'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyID', $_POST['updateCompetencyID'], SQLITE3_INTEGER);
+    $stmt->bindValue(':competencyMetric', $_POST['updateCompetencyMetric'], SQLITE3_TEXT);
+    $stmt->bindValue(':metricResult', $_POST['updateMetricResult'], SQLITE3_TEXT);
+    $stmt->bindValue(':studentStrengths', $_POST['updateStudentStrengths'], SQLITE3_TEXT);
+    $stmt->bindValue(':studentWeaknesses', $_POST['updateStudentWeaknesses'], SQLITE3_TEXT);
+    $stmt->bindValue(':recommendations', $_POST['updateRecommendations'], SQLITE3_TEXT);
+    $stmt->bindValue(':evaluationInstrument', $_POST['updateEvaluationInstrument'], SQLITE3_TEXT);
     $stmt->execute();
 
     // if user typed in competency key that already exists, display error message
@@ -110,7 +122,7 @@ function deleteCompetency() {
 
 function sortTable() {
     global $db;
-    $allowed_keys = ['CompetencyKey', 'CompetencyDesc'];
+    $allowed_keys = ['CompetencyKey', 'CompetencyDesc', 'CompetencyMetric', 'MetricResult', 'StudentStrengths', 'StudentWeaknesses', 'Recommendations', 'EvaluationInstrument'];
     $sort = isset($_POST['sort']) && in_array($_POST['sort'], $allowed_keys) ? $_POST['sort'] : 'CompetencyKey';
 
     $stmt = $db->prepare("SELECT * FROM competency ORDER BY $sort");
@@ -196,8 +208,31 @@ function fetchAllRows($result) {
                         </div>
                         <div class="inputBox">
                             <label for="competencyDesc">Competency Description:</label>
-                            <!-- TextArea for Competency Description -->
                             <textarea name="competencyDesc" id="competencyDesc" placeholder="Competency Description" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="competencyMetric">Metric</label>
+                            <textarea name="competencyMetric" id="competencyMetric" placeholder="Competency Metric" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="metricResult">Metric Result</label>
+                            <textarea name="metricResult" id="metricResult" placeholder="Metric Result" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="studentStrengths">Student Strengths</label>
+                            <textarea name="studentStrengths" id="studentStrengths" placeholder="Student Strengths" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="studentWeaknesses">Student Weaknesses</label>
+                            <textarea name="studentWeaknesses" id="studentWeaknesses" placeholder="Student Weaknesses" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="recommendations">Recommendations</label>
+                            <textarea name="recommendations" id="recommendations" placeholder="Recommendations" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="evaluationInstrument">Evaluation Instrument</label>
+                            <textarea name="evaluationInstrument" id="evaluationInstrument" placeholder="Evaluation Instrument" required></textarea>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Add Competency</button>
@@ -219,6 +254,36 @@ function fetchAllRows($result) {
                                 <button type="submit" name="sort" value="CompetencyDesc">Competency Description</button>
                             </form>
                         </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="CompetencyMetric">Metric</button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="MetricResult">Metric Result</button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="StudentStrengths">Student Strengths</button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="StudentWeaknesses">Student Weaknesses</button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="Recommendations">Recommendations</button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="POST">
+                                <button type="submit" name="sort" value="EvaluationInstrument">Evaluation Instrument</button>
+                            </form>
+                        </th>
                         <th>Actions</th>
                     </tr>
                     <?php
@@ -227,6 +292,12 @@ function fetchAllRows($result) {
                         echo '<td hidden>' . htmlspecialchars($row['CompetencyID'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyKey'] ?? '') . '</td>';
                         echo '<td style="text-align: left;">' . htmlspecialchars($row['CompetencyDesc'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['CompetencyMetric'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['MetricResult'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['StudentStrengths'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['StudentWeaknesses'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['Recommendations'] ?? '') . '</td>';
+                        echo '<td style="text-align: left;">' . htmlspecialchars($row['EvaluationInstrument'] ?? '') . '</td>';
                         echo '<td>';
                         ?>
                         <div class="actionButtons">
@@ -278,6 +349,30 @@ function fetchAllRows($result) {
                         <div class="inputBox">
                             <label for="updateCompetencyDesc">Competency Name:</label>
                             <textarea name="updateCompetencyDesc" id="updateCompetencyDesc" placeholder="Competency Description" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateCompetencyMetric">Metric</label>
+                            <textarea name="updateCompetencyMetric" id="updateCompetencyMetric" placeholder="Competency Metric" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateMetricResult">Metric Result</label>
+                            <textarea name="updateMetricResult" id="updateMetricResult" placeholder="Metric Result" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateStudentStrengths">Student Strengths</label>
+                            <textarea name="updateStudentStrengths" id="updateStudentStrengths" placeholder="Student Strengths" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateStudentWeaknesses">Student Weaknesses</label>
+                            <textarea name="updateStudentWeaknesses" id="updateStudentWeaknesses" placeholder="Student Weaknesses" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateRecommendations">Recommendations</label>
+                            <textarea name="updateRecommendations" id="updateRecommendations" placeholder="Recommendations" required></textarea>
+                        </div>
+                        <div class="inputBox">
+                            <label for="updateEvaluationInstrument">Evaluation Instrument</label>
+                            <textarea name="updateEvaluationInstrument" id="updateEvaluationInstrument" placeholder="Evaluation Instrument" required></textarea>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Update Competency</button>

@@ -36,7 +36,7 @@ if (!isset($_SESSION['email'])) {
             updateCourse();
         } elseif (isset($_POST['delete'])) {
             deleteCourse();
-        } elseif (isset($_POST['courseKey'], $_POST['courseName'], $_POST['competencyKey'], $_POST['objectiveDescription'], $_POST['evaluationInstrument'], $_POST['competencyMetric'])) {
+        } elseif (isset($_POST['courseKey'], $_POST['courseName'], $_POST['competencyKey'])) {
             addCourse();
         }
     }
@@ -61,13 +61,10 @@ function logAction($action) {
 
 function addCourse() {
     global $db;
-    $stmt = $db->prepare('INSERT INTO course (CourseKey, CourseName, CompetencyKey, ObjectiveDescription, EvaluationInstrument, CompetencyMetric) VALUES (:courseKey, :courseName, :competencyKey, :objectiveDescription, :evaluationInstrument, :competencyMetric)');
+    $stmt = $db->prepare('INSERT INTO course (CourseKey, CourseName, CompetencyKey) VALUES (:courseKey, :courseName, :competencyKey)');
     $stmt->bindValue(':courseKey', $_POST['courseKey'], SQLITE3_TEXT);
     $stmt->bindValue(':courseName', $_POST['courseName'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyKey', $_POST['competencyKey'], SQLITE3_TEXT);
-    $stmt->bindValue(':objectiveDescription', $_POST['objectiveDescription'], SQLITE3_TEXT);
-    $stmt->bindValue(':evaluationInstrument', $_POST['evaluationInstrument'], SQLITE3_TEXT);
-    $stmt->bindValue(':competencyMetric', $_POST['competencyMetric'], SQLITE3_TEXT);
     $stmt->execute();
 
     // if user typed in course key that already exists, display error message
@@ -82,13 +79,10 @@ function addCourse() {
 
 function updateCourse() {
     global $db;
-    $stmt = $db->prepare('UPDATE course SET CourseKey = :courseKey, CourseName = :courseName, CompetencyKey = :competencyKey, ObjectiveDescription = :objectiveDescription, EvaluationInstrument = :evaluationInstrument, CompetencyMetric = :competencyMetric WHERE CourseID = :courseID');
+    $stmt = $db->prepare('UPDATE course SET CourseKey = :courseKey, CourseName = :courseName, CompetencyKey = :competencyKey WHERE CourseID = :courseID');
     $stmt->bindValue(':courseKey', $_POST['updateCourseKey'], SQLITE3_TEXT);
     $stmt->bindValue(':courseName', $_POST['updateCourseName'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyKey', $_POST['updateCompetencyKey'], SQLITE3_TEXT);
-    $stmt->bindValue(':objectiveDescription', $_POST['updateObjectiveDescription'], SQLITE3_TEXT);
-    $stmt->bindValue(':evaluationInstrument', $_POST['updateEvaluationInstrument'], SQLITE3_TEXT);
-    $stmt->bindValue(':competencyMetric', $_POST['updateCompetencyMetric'], SQLITE3_TEXT);
     $stmt->bindValue(':courseID', $_POST['updateCourseID'], SQLITE3_INTEGER);
     $stmt->execute();
 
@@ -120,7 +114,7 @@ function deleteCourse() {
 
 function sortTable() {
     global $db;
-    $allowed_keys = ['CourseKey', 'CourseName', 'CompetencyKey', 'ObjectiveDescription', 'EvaluationInstrument', 'CompetencyMetric'];
+    $allowed_keys = ['CourseKey', 'CourseName', 'CompetencyKey'];
     $sort = isset($_POST['sort']) && in_array($_POST['sort'], $allowed_keys) ? $_POST['sort'] : 'CourseKey';
 
     $stmt = $db->prepare("SELECT * FROM course ORDER BY $sort");
@@ -255,7 +249,7 @@ function cleanUpCourses() {
                             <input type="text" name="courseName" id="courseName" placeholder="Course Name" required>
                         </div>
                         <div class="inputBox">
-                            <label for="competencyKey">Competency:</label>
+                            <label for="competencyKey">Competency ID:</label>
                             <select name="competencyKey" id="competencyKey">
                                 <option value="" hidden="hidden">Select a Competency</option>
                                 <?php
@@ -266,18 +260,6 @@ function cleanUpCourses() {
                                 }
                                 ?>
                             </select>
-                        </div>
-                        <div class="inputBox">
-                            <label for="objectiveDescription">Objective Description:</label>
-                            <textarea name="objectiveDescription" id="objectiveDescription" placeholder="Objective Description" required></textarea>
-                        </div>
-                        <div class="inputBox">
-                            <label for="evaluationInstrument">Evaluation Instrument:</label>
-                            <textarea name="evaluationInstrument" id="evaluationInstrument" placeholder="Evaluation Instrument" required></textarea>
-                        </div>
-                        <div class="inputBox">
-                            <label for="competencyMetric">Competency Metric:</label>
-                            <textarea name="competencyMetric" id="competencyMetric" placeholder="Competency Metric" required></textarea>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Add Course</button>
@@ -301,22 +283,7 @@ function cleanUpCourses() {
                         </th>
                         <th>
                             <form method="POST">
-                                <button type="submit" name="sort" value="CompetencyKey">Competency</button>
-                            </form>
-                        </th>
-                        <th>
-                            <form method="POST">
-                                <button type="submit" name="sort" value="ObjectiveDescription">Objective Description</button>
-                            </form>
-                        </th>
-                        <th>
-                            <form method="POST">
-                                <button type="submit" name="sort" value="EvaluationInstrument">Evaluation Instrument</button>
-                            </form>
-                        </th>
-                        <th>
-                            <form method="POST">
-                                <button type="submit" name="sort" value="CompetencyMetric">Competency Metric</button>
+                                <button type="submit" name="sort" value="CompetencyKey">Competency ID</button>
                             </form>
                         </th>
                         <th>Actions</th>
@@ -328,9 +295,6 @@ function cleanUpCourses() {
                         echo '<td>' . htmlspecialchars($row['CourseKey'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CourseName'] ?? '') . '</td>';
                         echo '<td>' . htmlspecialchars($row['CompetencyKey'] ?? '') . '</td>';
-                        echo '<td class="textArea">' . htmlspecialchars($row['ObjectiveDescription'] ?? '') . '</td>';
-                        echo '<td class="textArea">' . htmlspecialchars($row['EvaluationInstrument'] ?? '') . '</td>';
-                        echo '<td class="textArea">' . htmlspecialchars($row['CompetencyMetric'] ?? '') . '</td>';
                         echo '<td>';
                         ?>
                         <div class="actionButtons">
@@ -384,7 +348,7 @@ function cleanUpCourses() {
                             <input type="text" name="updateCourseName" id="updateCourseName" placeholder="Course Name" required>
                         </div>
                         <div class="inputBox">
-                            <label for="updateCompetencyKey">Competency:</label>
+                            <label for="updateCompetencyKey">Competency ID:</label>
                             <select name="updateCompetencyKey" id="updateCompetencyKey">
                                 <option value="" hidden="hidden" selected>Select Account Type</option>
                                 <?php
@@ -395,18 +359,6 @@ function cleanUpCourses() {
                                 }
                                 ?>
                             </select>
-                        </div>
-                        <div class="inputBox">
-                            <label for="updateObjectiveDescription">Objective Description:</label>
-                            <textarea name="updateObjectiveDescription" id="updateObjectiveDescription" placeholder="Objective Description" required></textarea>
-                        </div>
-                        <div class="inputBox">
-                            <label for="updateEvaluationInstrument">Evaluation Instrument:</label>
-                            <textarea name="updateEvaluationInstrument" id="updateEvaluationInstrument" placeholder="Evaluation Instrument" required></textarea>
-                        </div>
-                        <div class="inputBox">
-                            <label for="updateCompetencyMetric">Competency Metric:</label>
-                            <textarea name="updateCompetencyMetric" id="updateCompetencyMetric" placeholder="Competency Metric" required></textarea>
                         </div>
                         <div class="inputBox">
                             <button type="submit">Update Course</button>
