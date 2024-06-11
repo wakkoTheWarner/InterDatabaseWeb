@@ -1,0 +1,111 @@
+#container {
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+    flex-grow: 1;
+}
+
+.container-upperBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    background-color: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.container-upperBox > .formGrid,
+.container-upperBox > .tableGrid {
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.formGrid { grid-area: unset; }
+.tableGrid { grid-area: unset; }
+
+.formGrid, .tableGrid {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.formGrid label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.formGrid input[type="text"],
+.formGrid textarea,
+.formGrid button {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 8px;
+}
+
+.formGrid button {
+    background-color: #008245;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.formGrid button:hover {
+    background-color: #006B34;
+}
+
+.tableGrid table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableGrid th,
+.tableGrid td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 15px;
+}
+
+.tableGrid th {
+    background-color: #008245;
+    color: white;
+}
+
+/* Added rounding to first and last headers */
+.tableGrid th:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.tableGrid th:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.tableGrid th:hover {
+    background-color: #006B34;
+}
+
+.tableGrid tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.tableGrid h2 {
+    font-size: 24px;
+    color: red;
+}
+
+textarea {
+    resize: vertical;
+    border-radius: 8px;
+}
+
+.noselect {
+    background-color: #e0e0e0;
+    cursor: default;
+}

@@ -63,6 +63,7 @@ if (!isset($_SESSION['email'])) {
                         <th>Section Key</th>
                         <th>Course Key</th>
                         <th>Professor Email</th>
+                        <th>Actions</th>
                     </tr>
                     <?php
                     // Retrieve the email of the currently logged in professor from the session
@@ -81,6 +82,14 @@ if (!isset($_SESSION['email'])) {
                         echo "<td>" . $row['SectionKey'] . "</td>";
                         echo "<td>" . $row['CourseKey'] . "</td>";
                         echo "<td>" . $row['ProfessorEmail'] . "</td>";
+                        ?>
+                        <td>
+                            <form method="POST" action="profCourseCompetency.php">
+                                <input type="hidden" name="courseKey" value="<?php echo $row['CourseKey']; ?>">
+                                <button class="actionButtons" type="submit">Edit Course Competency</button>
+                            </form>
+                        </td>
+                        <?php
                         echo "</tr>";
                     }
                     ?>

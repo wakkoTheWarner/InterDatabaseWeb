@@ -44,3 +44,23 @@
     border-bottom: 1px solid #ccc;
     text-align: center;
 }
+
+.actionButtons {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    max-width: 250px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+button:hover {
+    opacity: 0.8;
+}
