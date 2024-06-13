@@ -1,8 +1,8 @@
 <?php
 // Modify error reporting for production use
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(0);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(1);
 ini_set('log_errors', 1);
 ini_set('error_log', '/path/to/php-error.log');
 
@@ -24,8 +24,8 @@ if (!isset($_SESSION['email'])) {
         $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
     }
 
-    // Clean up sections that do not have a course key
-    $error = cleanUpSection();
+    // Clean up courses by checking if competency exists in the competency table
+    cleanUpSections();
 
     $stmt = $db->prepare('SELECT * FROM section');
     $result = $stmt->execute();
@@ -132,43 +132,74 @@ function fetchAllRows($result) {
     return $rows;
 }
 
-function cleanUpSection() {
-    // count number of courses that do not have a competency
-    $counter = 0;
-
-    // Check all sections to see if they have a course key that is not in the course table
+function cleanUpSections() {
     global $db;
+    $counter = 0;
+    $alertMessage = '';
+
+    // Retrieve all sections from the section table
     $stmt = $db->prepare('SELECT * FROM section');
     $result = $stmt->execute();
-    $sections = fetchAllRows($result);
+
+    $sections = [];
+    while ($section = $result->fetchArray(SQLITE3_ASSOC)) {
+        $sections[] = $section;
+    }
+
+    if (!$sections) return;
 
     foreach ($sections as $section) {
+        // Check if the course associated with the section exists
         $stmt = $db->prepare('SELECT * FROM course WHERE CourseKey = :courseKey');
         $stmt->bindValue(':courseKey', $section['CourseKey'], SQLITE3_TEXT);
         $result = $stmt->execute();
         $course = $result->fetchArray(SQLITE3_ASSOC);
 
+        // If the course does not exist, update the section's course key to NULL
         if (!$course) {
-            if ($section['CourseKey'] !== null) {
-                $stmt = $db->prepare('UPDATE section SET CourseKey = :courseKey WHERE SectionID = :sectionID');
-                $stmt->bindValue(':sectionID', $section['SectionID'], SQLITE3_INTEGER);
-                $stmt->execute();
-            }
-
+            $stmt = $db->prepare('UPDATE section SET CourseKey = NULL WHERE SectionID = :sectionID');
+            $stmt->bindValue(':sectionID', $section['SectionID'], SQLITE3_INTEGER);
+            $stmt->execute();
             $counter++;
         }
     }
 
-    // Generate error message if there are courses without a competency
+    // Prepare the query to check if an alert for the current page already exists
+    $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND AlertType = :alertType');
+    $stmt->bindValue(':pageName', 'adminSection.php', SQLITE3_TEXT);
+    $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+    $result = $stmt->execute();
+    $existingAlert = $result->fetchArray(SQLITE3_ASSOC);
+
     if ($counter > 0) {
-        // if more than 1 course does not have a competency, display plural message
-        if ($counter > 1) {
-            return $counter . ' sections do not have a course key. Please assign a course key to each section.';
-        } else {
-            return $counter . ' section does not have a course key. Please assign a course key to each section.';
+        $alertMessage .= 'Course Key(s) were Missing in ' . $counter . ' Section(s)! These sections have been deleted.';
+
+        // If no identical active alert exists, insert the new alert
+        if (!$existingAlert) {
+            $stmt = $db->prepare('INSERT INTO alerts (PageName, Message, AlertType, IsActive, StartDate, EndDate) VALUES (:pageName, :message, :alertType, :isActive, :startDate, :endDate)');
+            $stmt->bindValue(':pageName', 'adminSection.php', SQLITE3_TEXT);
+            $stmt->bindValue(':message', $alertMessage, SQLITE3_TEXT);
+            $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+            $stmt->bindValue(':isActive', 1, SQLITE3_INTEGER);
+            $stmt->bindValue(':startDate', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
+            $stmt->execute();
+        } elseif ($existingAlert['IsActive'] == 0) {
+            // If an alert exists for the current page but it's not active, set its IsActive field to 1
+            $stmt = $db->prepare('UPDATE alerts SET IsActive = 1, StartDate = :startDate, EndDate = :endDate WHERE AlertID = :alertID');
+            $stmt->bindValue(':startDate', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
+            $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
+            $stmt->execute();
+        }
+    } else {
+        // If an alert exists for the current page and it's active, set its IsActive field to 0
+        if($existingAlert && $existingAlert['IsActive'] == 1) {
+            $stmt = $db->prepare('UPDATE alerts SET IsActive = 0 WHERE AlertID = :alertID');
+            $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
+            $stmt->execute();
         }
     }
-    return null;
 }
 ?>
 
@@ -223,19 +254,31 @@ function cleanUpSection() {
     </div>
     <div id="container">
         <div class="container-upperBox">
-            <div class="sectionsForm">
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="error">
-                        <p><?php echo htmlspecialchars($_GET['error']); ?></p>
-                    </div>
-                <?php endif; ?>
-                <?php
-                if ($error !== null) {
-                    echo '<div class="error">';
-                    echo '<p>' . htmlspecialchars($error) . '</p>';
-                    echo '</div>';
-                }
+            <?php
+            // Get the SectionID of the current section
+            $stmt = $db->prepare('SELECT SectionID FROM section WHERE SectionKey = :sectionKey');
+            $stmt->bindValue(':sectionKey', $_POST['sectionKey'], SQLITE3_TEXT);
+            $result = $stmt->execute();
+            $sectionID = $result->fetchArray(SQLITE3_ASSOC)['SectionID'];
+
+            // Prepare the query to get the active alert for the current page and the current section
+            $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND IsActive = 1 AND StartDate <= :now AND EndDate >= :now AND (DataID = :dataID OR DataID IS NULL)');
+            $stmt->bindValue(':pageName', basename($_SERVER['PHP_SELF']), SQLITE3_TEXT);
+            $stmt->bindValue(':now', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':dataID', $sectionID, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $alert = $result->fetchArray(SQLITE3_ASSOC);
+
+            if ($alert) {
                 ?>
+                <div class="alert alert-<?php echo htmlspecialchars($alert['AlertType']); ?>" role="alert">
+                    <?php echo htmlspecialchars($alert['Message']); ?>
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+                <?php
+            }
+            ?>
+            <div class="sectionsForm">
                 <div class="header">
                     <h2>Sections Manager</h2>
                 </div>
