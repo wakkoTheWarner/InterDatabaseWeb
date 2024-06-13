@@ -1,8 +1,8 @@
 <?php
 // Modify error reporting for production use
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
-error_reporting(0);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(1);
 ini_set('log_errors', 1);
 ini_set('error_log', '/path/to/php-error.log');
 
@@ -25,14 +25,14 @@ if (!isset($_SESSION['email'])) {
     }
 
     // Clean up courses by checking if competency exists in the competency table
-    $error = cleanUpCourses();
+    cleanUpCourses();
 
     $stmt = $db->prepare('SELECT * FROM course');
     $result = $stmt->execute();
     $courses = $result->fetchArray(SQLITE3_ASSOC);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['updateCourseID'], $_POST['updateCourseKey'], $_POST['updateCourseName'], $_POST['updateCompetencyKey'], $_POST['updateObjectiveDescription'], $_POST['updateEvaluationInstrument'], $_POST['updateCompetencyMetric'])) {
+        if (isset($_POST['updateCourseID'], $_POST['updateCourseKey'], $_POST['updateCourseName'], $_POST['updateCompetencyKey'])) {
             updateCourse();
         } elseif (isset($_POST['delete'])) {
             deleteCourse();
@@ -132,42 +132,73 @@ function fetchAllRows($result) {
 }
 
 function cleanUpCourses() {
-    // count number of courses that do not have a competency
-    $counter = 0;
-
-    // Check all courses and make competency null if it does not exist in the competency table
     global $db;
+    $counter = 0;
+    $alertMessage = '';
+
+    // Retrieve all courses from the course table
     $stmt = $db->prepare('SELECT * FROM course');
     $result = $stmt->execute();
-    $courses = fetchAllRows($result);
+
+    $courses = [];
+    while ($course = $result->fetchArray(SQLITE3_ASSOC)) {
+        $courses[] = $course;
+    }
+
+    if (!$courses) return;
 
     foreach ($courses as $course) {
+        // Check if the competency associated with the course exists
         $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyKey = :competencyKey');
         $stmt->bindValue(':competencyKey', $course['CompetencyKey'], SQLITE3_TEXT);
         $result = $stmt->execute();
         $competency = $result->fetchArray(SQLITE3_ASSOC);
 
+        // If the competency does not exist, update the course's CompetencyKey to null
         if (!$competency) {
-            if ($course['CompetencyKey'] !== null) {
-                $stmt = $db->prepare('UPDATE course SET CompetencyKey = NULL WHERE CourseID = :courseID');
-                $stmt->bindValue(':courseID', $course['CourseID'], SQLITE3_INTEGER);
-                $stmt->execute();
-            }
-
+            $stmt = $db->prepare('UPDATE course SET CompetencyKey = NULL WHERE CourseKey = :courseKey');
+            $stmt->bindValue(':courseKey', $course['CourseKey'], SQLITE3_TEXT);
+            $stmt->execute();
             $counter++;
         }
     }
 
-    // Generate error message if there are courses without a competency
+    // Prepare the query to check if an alert for the current page already exists
+    $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND AlertType = :alertType');
+    $stmt->bindValue(':pageName', 'adminCourses.php', SQLITE3_TEXT);
+    $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+    $result = $stmt->execute();
+    $existingAlert = $result->fetchArray(SQLITE3_ASSOC);
+
     if ($counter > 0) {
-        // if more than 1 course does not have a competency, display plural message
-        if ($counter > 1) {
-            return 'There are ' . $counter . ' courses that do not have a competency. Please assign a competency to each course.';
-        } else {
-            return 'There is ' . $counter . ' course that does not have a competency. Please assign a competency to each course.';
+        $alertMessage .= 'Competency Key(s) were Missing in ' . $counter . ' Course(s)! Their Competency Key has been set to NULL.';
+
+        // If no identical active alert exists, insert the new alert
+        if (!$existingAlert) {
+            $stmt = $db->prepare('INSERT INTO alerts (PageName, Message, AlertType, IsActive, StartDate, EndDate) VALUES (:pageName, :message, :alertType, :isActive, :startDate, :endDate)');
+            $stmt->bindValue(':pageName', 'adminCourses.php', SQLITE3_TEXT);
+            $stmt->bindValue(':message', $alertMessage, SQLITE3_TEXT);
+            $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+            $stmt->bindValue(':isActive', 1, SQLITE3_INTEGER);
+            $stmt->bindValue(':startDate', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
+            $stmt->execute();
+        } elseif ($existingAlert['IsActive'] == 0) {
+            // If an alert exists for the current page but it's not active, set its IsActive field to 1
+            $stmt = $db->prepare('UPDATE alerts SET IsActive = 1, StartDate = :startDate, EndDate = :endDate WHERE AlertID = :alertID');
+            $stmt->bindValue(':startDate', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
+            $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
+            $stmt->execute();
+        }
+    } else {
+        // If an alert exists for the current page and it's active, set its IsActive field to 0
+        if($existingAlert && $existingAlert['IsActive'] == 1) {
+            $stmt = $db->prepare('UPDATE alerts SET IsActive = 0 WHERE AlertID = :alertID');
+            $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
+            $stmt->execute();
         }
     }
-    return null;
 }
 ?>
 
@@ -222,19 +253,31 @@ function cleanUpCourses() {
     </div>
     <div id="container">
         <div class="container-upperBox">
-            <div class="coursesForm">
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="error">
-                        <p><?php echo htmlspecialchars($_GET['error']); ?></p>
-                    </div>
-                <?php endif; ?>
-                <?php
-                if ($error !== null) {
-                    echo '<div class="error">';
-                    echo '<p>' . htmlspecialchars($error) . '</p>';
-                    echo '</div>';
-                }
+            <?php
+            // Get the CourseID of the current course
+            $stmt = $db->prepare('SELECT CourseID FROM course WHERE CourseKey = :courseKey');
+            $stmt->bindValue(':courseKey', $_POST['courseKey'], SQLITE3_TEXT);
+            $result = $stmt->execute();
+            $courseID = $result->fetchArray(SQLITE3_ASSOC)['CourseID'];
+
+            // Prepare the query to get the active alert for the current page and the current course
+            $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND IsActive = 1 AND StartDate <= :now AND EndDate >= :now AND (DataID = :dataID OR DataID IS NULL)');
+            $stmt->bindValue(':pageName', basename($_SERVER['PHP_SELF']), SQLITE3_TEXT);
+            $stmt->bindValue(':now', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':dataID', $courseID, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $alert = $result->fetchArray(SQLITE3_ASSOC);
+
+            if ($alert) {
                 ?>
+                <div class="alert alert-<?php echo htmlspecialchars($alert['AlertType']); ?>" role="alert">
+                    <?php echo htmlspecialchars($alert['Message']); ?>
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+                <?php
+            }
+            ?>
+            <div class="coursesForm">
                 <div class="header">
                     <h2>Courses Manager</h2>
                 </div>

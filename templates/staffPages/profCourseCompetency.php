@@ -24,6 +24,10 @@ if (!isset($_SESSION['email'])) {
         $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
     }
 
+    // Get courseKey from the request
+    $courseKey = $_POST['courseKey'];
+    $alertMessage = cleanUpCourse($courseKey);
+
     // Query for course table
     $queryCourse = "SELECT * FROM course";
     $stmtCourse = $db->prepare($queryCourse);
@@ -82,6 +86,13 @@ if (!isset($_SESSION['email'])) {
                 $stmt->bindValue(':competencyKey', $competencyKey, SQLITE3_TEXT);
                 $stmt->execute();
 
+                // Log the action taken
+                if ($db->lastErrorCode() === 0) {
+                    logAction('Updated competency: ' . $competencyKey);
+                } else {
+                    logAction('Failed to update competency: ' . $competencyKey);
+                }
+
                 $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyKey = :competencyKey');
                 $stmt->bindValue(':competencyKey', $competencyKey, SQLITE3_TEXT);
                 $result = $stmt->execute();
@@ -98,6 +109,13 @@ if (!isset($_SESSION['email'])) {
                 $stmt->bindValue(':recommendations', $recommendations);
                 $stmt->bindValue(':evaluationInstrument', $evaluationInstrument);
                 $stmt->execute();
+
+                // Log the action taken
+                if ($db->lastErrorCode() === 0) {
+                    logAction('Created competency: ' . $competencyKey);
+                } else {
+                    logAction('Failed to create competency: ' . $competencyKey);
+                }
 
                 $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyKey = :competencyKey');
                 $stmt->bindValue(':competencyKey', $competencyKey, SQLITE3_TEXT);
@@ -127,6 +145,71 @@ function fetchAllRows($result) {
         $rows[] = $row;
     }
     return $rows;
+}
+
+function logAction($action) {
+    // Log all actions taken by the user to single a txt file. If txt file does not exist, create it.
+    // Log Format: [Date-Time] [Log Level] [User Email] [Transaction ID] [Action] [Status] [Message]
+    $log = fopen('../../backend/log/log.txt', 'a');
+    fwrite($log, '[' . date('Y-m-d H:i:s') . '] [INFO] ' . $_SESSION['email'] . ' - ' . $action . ' - Success' . PHP_EOL);
+    fclose($log);
+}
+
+function cleanUpCourse($courseKey) {
+    global $db;
+    $counter = 0;
+    $alertMessage = '';
+
+    // Prepare the query to get the course details using the courseKey
+    $stmt = $db->prepare('SELECT * FROM course WHERE CourseKey = :courseKey');
+    $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+    $result = $stmt->execute();
+    $course = $result->fetchArray(SQLITE3_ASSOC);
+
+    // if no such course exists, exit the function
+    if (!$course) return;
+
+    // Check if the competency associated with the course exists
+    $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyKey = :competencyKey');
+    $stmt->bindValue(':competencyKey', $course['CompetencyKey'], SQLITE3_TEXT);
+    $result = $stmt->execute();
+    $competency = $result->fetchArray(SQLITE3_ASSOC);
+
+    // If the competency does not exist, update the course's CompetencyKey to null
+    if (!$competency && $course['CompetencyKey'] !== null) {
+        $stmt = $db->prepare('UPDATE course SET CompetencyKey = NULL WHERE CourseKey = :courseKey');
+        $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+        $stmt->execute();
+        $counter++;
+    }
+
+    if ($counter > 0) {
+        $alertMessage .= 'Competency Key was Missing! Course Competency Key has been set to NULL. Please contact the admin if this was unintentional.';
+
+        // Prepare the query to check if an identical alert already exists
+        $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND Message = :message AND AlertType = :alertType AND DataID = :dataID');
+        $stmt->bindValue(':pageName', 'profCourseCompetency.php', SQLITE3_TEXT);
+        $stmt->bindValue(':message', $alertMessage, SQLITE3_TEXT);
+        $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+        $stmt->bindValue(':dataID', $course['CourseID'], SQLITE3_INTEGER);
+        $result = $stmt->execute();
+        $existingAlert = $result->fetchArray(SQLITE3_ASSOC);
+
+        // If no identical alert exists, insert the new alert
+        if (!$existingAlert) {
+            $stmt = $db->prepare('INSERT INTO alerts (PageName, Message, AlertType, IsActive, StartDate, EndDate, DataID) VALUES (:pageName, :message, :alertType, :isActive, :startDate, :endDate, :dataID)');
+            $stmt->bindValue(':pageName', 'profCourseCompetency.php', SQLITE3_TEXT);
+            $stmt->bindValue(':message', $alertMessage, SQLITE3_TEXT);
+            $stmt->bindValue(':alertType', 'danger', SQLITE3_TEXT);
+            $stmt->bindValue(':isActive', 1, SQLITE3_INTEGER);
+            $stmt->bindValue(':startDate', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
+            $stmt->bindValue(':dataID', $course['CourseID'], SQLITE3_INTEGER);
+            $stmt->execute();
+        }
+    }
+
+    return $alertMessage;
 }
 ?>
 <!DOCTYPE html>
@@ -162,6 +245,30 @@ function fetchAllRows($result) {
     </div>
     <div id="container">
         <div class="container-upperBox">
+            <?php
+            // Get the CourseID of the current course
+            $stmt = $db->prepare('SELECT CourseID FROM course WHERE CourseKey = :courseKey');
+            $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+            $result = $stmt->execute();
+            $courseID = $result->fetchArray(SQLITE3_ASSOC)['CourseID'];
+
+            // Prepare the query to get the active alert for the current page and the current course
+            $stmt = $db->prepare('SELECT * FROM alerts WHERE PageName = :pageName AND IsActive = 1 AND StartDate <= :now AND EndDate >= :now AND (DataID = :dataID OR DataID IS NULL)');
+            $stmt->bindValue(':pageName', 'profCourseCompetency.php', SQLITE3_TEXT);
+            $stmt->bindValue(':now', date('Y-m-d H:i:s'), SQLITE3_TEXT);
+            $stmt->bindValue(':dataID', $courseID, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $alert = $result->fetchArray(SQLITE3_ASSOC);
+
+            if ($alert) {
+                ?>
+                <div class="alert alert-<?php echo htmlspecialchars($alert['AlertType']); ?>" role="alert">
+                    <?php echo htmlspecialchars($alert['Message']); ?>
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+                <?php
+            }
+            ?>
             <div class="formGrid">
                 <h1>Course Competency for <?php echo $_POST['courseKey']; ?></h1>
                 <form method="post">
