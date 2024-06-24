@@ -190,6 +190,12 @@ function cleanUpCourses() {
             $stmt->bindValue(':endDate', date('Y-m-d H:i:s', strtotime('+1 day')), SQLITE3_TEXT);
             $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
             $stmt->execute();
+        } elseif ($existingAlert['IsActive'] == 1) {
+            // If an alert exists for the current page and it's active, update its message
+            $stmt = $db->prepare('UPDATE alerts SET Message = :message WHERE AlertID = :alertID');
+            $stmt->bindValue(':message', $alertMessage, SQLITE3_TEXT);
+            $stmt->bindValue(':alertID', $existingAlert['AlertID'], SQLITE3_INTEGER);
+            $stmt->execute();
         }
     } else {
         // If an alert exists for the current page and it's active, set its IsActive field to 0
