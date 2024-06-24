@@ -81,6 +81,15 @@ function addCompetency() {
 
 function updateCompetency() {
     global $db;
+
+    # grab competency key and competency key update
+    $stmt = $db->prepare('SELECT CompetencyKey FROM competency WHERE CompetencyID = :competencyID');
+    $stmt->bindValue(':competencyID', $_POST['updateCompetencyID'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $competencyKey = $result->fetchArray(SQLITE3_ASSOC);
+
+    updateForeignKey($competencyKey['CompetencyKey'], $_POST['updateCompetencyKey']);
+
     $stmt = $db->prepare('UPDATE competency SET CompetencyKey = :competencyKey, CompetencyDesc = :competencyDesc, CompetencyMetric = :competencyMetric, MetricResult = :metricResult, StudentStrengths = :studentStrengths, StudentWeaknesses = :studentWeaknesses, Recommendations = :recommendations, EvaluationInstrument = :evaluationInstrument WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':competencyKey', $_POST['updateCompetencyKey'], SQLITE3_TEXT);
     $stmt->bindValue(':competencyDesc', $_POST['updateCompetencyDesc'], SQLITE3_TEXT);
@@ -100,11 +109,21 @@ function updateCompetency() {
         logAction('Updated competency: ' . $_POST['updateCompetencyKey']);
         header('Location: adminCompetency.php');
     }
+
     exit;
 }
 
 function deleteCompetency() {
     global $db;
+
+    # grab competency key
+    $stmt = $db->prepare('SELECT CompetencyKey FROM competency WHERE CompetencyID = :competencyID');
+    $stmt->bindValue(':competencyID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $competencyKey = $result->fetchArray(SQLITE3_ASSOC)['CompetencyKey'];
+
+    updateForeignKey($competencyKey, null);
+
     // query the section ID to get the section key, course key, and professor email for the logger
     $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':competencyID', $_POST['delete'], SQLITE3_INTEGER);
@@ -116,6 +135,7 @@ function deleteCompetency() {
     $stmt = $db->prepare('DELETE FROM competency WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':competencyID', $_POST['delete'], SQLITE3_INTEGER);
     $stmt->execute();
+
     header('Location: adminCompetency.php');
     exit;
 }
@@ -137,6 +157,29 @@ function fetchAllRows($result) {
         $rows[] = $row;
     }
     return $rows;
+}
+
+# Update CompetencyKey foreign key in course table if CompetencyKey in competency table is deleted or updated
+function updateForeignKey($competencyKey, $competencyKeyUpdate) {
+    global $db;
+    if ($competencyKeyUpdate === null) {
+        $tables = ['course'];
+        foreach ($tables as $table) {
+            $stmt = $db->prepare("UPDATE $table SET CompetencyKey = NULL WHERE CompetencyKey = :competencyKey");
+            $stmt->bindValue(':competencyKey', $competencyKey, SQLITE3_TEXT);
+            $stmt->execute();
+        }
+    } else {
+        $tables = ['course'];
+        foreach ($tables as $table) {
+            $stmt = $db->prepare("UPDATE $table SET CompetencyKey = :competencyKeyUpdate WHERE CompetencyKey = :competencyKey");
+            $stmt->bindValue(':competencyKey', $competencyKey, SQLITE3_TEXT);
+            $stmt->bindValue(':competencyKeyUpdate', $competencyKeyUpdate, SQLITE3_TEXT);
+            $stmt->execute();
+        }
+    }
+
+    return;
 }
 ?>
 

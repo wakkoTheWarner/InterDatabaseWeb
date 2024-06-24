@@ -77,6 +77,14 @@ function addTerm() {
 
 function updateTerm() {
     global $db;
+
+    $stmt = $db->prepare('SELECT TermKey FROM term WHERE TermID = :termID');
+    $stmt->bindValue(':termID', $_POST['updateTermID'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $termKey = $result->fetchArray(SQLITE3_ASSOC);
+
+    updateForeignKey($termKey['TermKey'], $_POST['updateTermKey']);
+
     $stmt = $db->prepare('UPDATE term SET TermKey = :termKey, TermName = :termName, TermStart = :termStart, TermEnd = :termEnd WHERE TermID = :termID');
     $stmt->bindValue(':termKey', $_POST['updateTermKey'], SQLITE3_TEXT);
     $stmt->bindValue(':termName', $_POST['updateTermName'], SQLITE3_TEXT);
@@ -97,6 +105,13 @@ function updateTerm() {
 
 function deleteTerm() {
     global $db;
+    $stmt = $db->prepare('SELECT TermKey FROM term WHERE TermID = :termID');
+    $stmt->bindValue(':termID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $termKey = $result->fetchArray(SQLITE3_ASSOC)['TermKey'];
+
+    updateForeignKey($termKey, null);
+
     // query the section ID to get the section key, course key, and professor email for the logger
     $stmt = $db->prepare('SELECT * FROM term WHERE TermID = :termID');
     $stmt->bindValue(':termID', $_POST['delete'], SQLITE3_INTEGER);
@@ -129,6 +144,32 @@ function fetchAllRows($result) {
         $rows[] = $row;
     }
     return $rows;
+}
+
+function updateForeignKey($termKey, $updateTermKey) {
+    global $db;
+    if ($updateTermKey === null) {
+        $tables = ['termCourses'];
+        foreach ($tables as $table) {
+            if ($table === 'termCourses') {
+                $stmt = $db->prepare("DELETE FROM $table WHERE TermKey = :termKey");
+                $stmt->bindValue(':termKey', $termKey, SQLITE3_TEXT);
+                $stmt->execute();
+            } else {
+                $stmt = $db->prepare("UPDATE $table SET TermKey = NULL WHERE TermKey = :termKey");
+                $stmt->bindValue(':termKey', $termKey, SQLITE3_TEXT);
+                $stmt->execute();
+            }
+        }
+    } else {
+        $tables = ['termCourses'];
+        foreach ($tables as $table) {
+            $stmt = $db->prepare("UPDATE $table SET TermKey = :updateTermKey WHERE TermKey = :termKey");
+            $stmt->bindValue(':updateTermKey', $updateTermKey, SQLITE3_TEXT);
+            $stmt->bindValue(':termKey', $termKey, SQLITE3_TEXT);
+            $stmt->execute();
+        }
+    }
 }
 ?>
 

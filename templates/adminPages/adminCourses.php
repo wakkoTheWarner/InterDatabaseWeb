@@ -79,6 +79,13 @@ function addCourse() {
 
 function updateCourse() {
     global $db;
+    $stmt = $db->prepare('SELECT CourseKey FROM course WHERE CourseID = :courseID');
+    $stmt->bindValue(':courseID', $_POST['updateCourseID'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $courseKey = $result->fetchArray(SQLITE3_ASSOC)['CourseKey'];
+
+    updateForeignKey($courseKey, $_POST['updateCourseKey']);
+
     $stmt = $db->prepare('UPDATE course SET CourseKey = :courseKey, CourseName = :courseName, CompetencyKey = :competencyKey WHERE CourseID = :courseID');
     $stmt->bindValue(':courseKey', $_POST['updateCourseKey'], SQLITE3_TEXT);
     $stmt->bindValue(':courseName', $_POST['updateCourseName'], SQLITE3_TEXT);
@@ -98,6 +105,13 @@ function updateCourse() {
 
 function deleteCourse() {
     global $db;
+    $stmt = $db->prepare('SELECT CourseKey FROM course WHERE CourseID = :courseID');
+    $stmt->bindValue(':courseID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $courseKey = $result->fetchArray(SQLITE3_ASSOC)['CourseKey'];
+
+    updateForeignKey($courseKey, null);
+
     $stmt = $db->prepare('SELECT * FROM competency WHERE CompetencyID = :competencyID');
     $stmt->bindValue(':courseID', $_POST['delete'], SQLITE3_INTEGER);
     $result = $stmt->execute();
@@ -199,6 +213,36 @@ function cleanUpCourses() {
             $stmt->execute();
         }
     }
+}
+
+function updateForeignKey($courseKey, $updateCourseKey) {
+    global $db;
+    if ($updateCourseKey === null) {
+        # delete CourseKey foreign key from all tables
+        $tables = ['section', 'programCourses', 'termCourses'];
+        foreach ($tables as $table) {
+            if ($table === 'programCourses' OR $table === 'termCourses') {
+                $stmt = $db->prepare("DELETE FROM $table WHERE CourseKey = :courseKey");
+                $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+                $stmt->execute();
+            } else {
+                $stmt = $db->prepare("UPDATE $table SET CourseKey = NULL WHERE CourseKey = :courseKey");
+                $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+                $stmt->execute();
+            }
+        }
+    } else {
+        # update CourseKey foreign key in all tables
+        $tables = ['section', 'programCourses', 'termCourses'];
+        foreach ($tables as $table) {
+            $stmt = $db->prepare("UPDATE $table SET CourseKey = :updateCourseKey WHERE CourseKey = :courseKey");
+            $stmt->bindValue(':updateCourseKey', $updateCourseKey, SQLITE3_TEXT);
+            $stmt->bindValue(':courseKey', $courseKey, SQLITE3_TEXT);
+            $stmt->execute();
+        }
+    }
+
+    return;
 }
 ?>
 

@@ -75,6 +75,14 @@ function addProgram() {
 
 function updateProgram() {
     global $db;
+
+    $stmt = $db->prepare('SELECT ProgramKey FROM program WHERE ProgramID = :programID');
+    $stmt->bindValue(':programID', $_POST['updateProgramID'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $programKey = $result->fetchArray(SQLITE3_ASSOC);
+
+    updateForeignKey($programKey['ProgramKey'], $_POST['updateProgramKey']);
+
     $stmt = $db->prepare('UPDATE program SET ProgramKey = :programKey, ProgramName = :programName WHERE ProgramID = :programID');
     $stmt->bindValue(':programKey', $_POST['updateProgramKey'], SQLITE3_TEXT);
     $stmt->bindValue(':programName', $_POST['updateProgramName'], SQLITE3_TEXT);
@@ -93,6 +101,13 @@ function updateProgram() {
 
 function deleteProgram() {
     global $db;
+    $stmt = $db->prepare('SELECT ProgramKey FROM program WHERE ProgramID = :programID');
+    $stmt->bindValue(':programID', $_POST['delete'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $programKey = $result->fetchArray(SQLITE3_ASSOC)['ProgramKey'];
+
+    updateForeignKey($programKey, null);
+
     $stmt = $db->prepare('SELECT * FROM program WHERE ProgramID = :programID');
     $stmt->bindValue(':programID', $_POST['delete'], SQLITE3_INTEGER);
     $result = $stmt->execute();
@@ -124,6 +139,33 @@ function fetchAllRows($result) {
         $rows[] = $row;
     }
     return $rows;
+}
+
+function updateForeignKey($programKey, $updateProgramKey) {
+    global $db;
+    if ($updateProgramKey === null) {
+        $tables = ['programCourses'];
+        foreach ($tables as $table) {
+            if ($table === 'programCourses') {
+                $stmt = $db->prepare("DELETE FROM $table WHERE ProgramKey = :programKey");
+                $stmt->bindValue(':programKey', $programKey, SQLITE3_TEXT);
+                $stmt->execute();
+            } else {
+                $stmt = $db->prepare("UPDATE $table SET ProgramKey = :updateProgramKey WHERE ProgramKey = :programKey");
+                $stmt->bindValue(':updateProgramKey', $updateProgramKey, SQLITE3_TEXT);
+                $stmt->bindValue(':programKey', $programKey, SQLITE3_TEXT);
+                $stmt->execute();
+            }
+        }
+    } else {
+        $tables = ['programCourses'];
+        foreach ($tables as $table) {
+            $stmt = $db->prepare("UPDATE $table SET ProgramKey = :updateProgramKey WHERE ProgramKey = :programKey");
+            $stmt->bindValue(':updateProgramKey', $updateProgramKey, SQLITE3_TEXT);
+            $stmt->bindValue(':programKey', $programKey, SQLITE3_TEXT);
+            $stmt->execute();
+        }
+    }
 }
 ?>
 
