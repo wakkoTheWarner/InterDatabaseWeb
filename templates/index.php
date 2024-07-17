@@ -16,42 +16,44 @@ if (!empty($_POST)) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = filter_var($_POST['password'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-    if ($config['db']['type'] === 'sqlite') {
-        $db = new SQLite3($config['db']['sqlite']['path']);
-    } elseif ($config['db']['type'] === 'mysql') {
-        $dsn = "mysql:host={$config['db']['mysql']['host']};dbname={$config['db']['mysql']['dbname']}";
-        $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
-    }
-
-    $stmt = $db->prepare('SELECT * FROM user WHERE Email = :email');
-    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
-
-    $result = $stmt->execute();
-    $user = $result->fetchArray();
-
-    // Debug information
-    #echo 'POST data: ';
-    #var_dump($_POST);
-    #echo 'User data: ';
-    #var_dump($user);
-
-    if ($user && password_verify($password, $user['Password'])) {
-        session_regenerate_id();
-        $_SESSION['userID'] = $user['UserID'];
-        $_SESSION['email'] = $user['Email'];
-        $_SESSION['firstName'] = $user['FirstName'];
-        $_SESSION['lastName'] = $user['LastName'];
-        $_SESSION['accountType'] = $user['AccountType'];
-
-        if ($user['AccountType'] === 'Root' || $user['AccountType'] === 'Admin' || $user['AccountType'] === 'Staff') {
-            header('Location: adminPages/adminDashboard.php');
-            exit;
-        } elseif ($user['AccountType'] === 'Professor') {
-            header('Location: staffPages/profPage.php');
-            exit;
+    try {
+        if ($config['db']['type'] === 'sqlite') {
+            $dsn = "sqlite:" . $config['db']['sqlite']['path'];
+            $db = new PDO($dsn);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } elseif ($config['db']['type'] === 'mysql') {
+            $dsn = "mysql:host={$config['db']['mysql']['host']};dbname={$config['db']['mysql']['dbname']}";
+            $db = new PDO($dsn, $config['db']['mysql']['username'], $config['db']['mysql']['password']);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
-    } else {
-        $error = 'Invalid email or password.';
+
+        $stmt = $db->prepare('SELECT * FROM user WHERE Email = :email');
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($password, $user['Password'])) {
+            session_regenerate_id();
+            $_SESSION['userID'] = $user['UserID'];
+            $_SESSION['email'] = $user['Email'];
+            $_SESSION['firstName'] = $user['FirstName'];
+            $_SESSION['lastName'] = $user['LastName'];
+            $_SESSION['accountType'] = $user['AccountType'];
+
+            if ($user['AccountType'] === 'Root' || $user['AccountType'] === 'Admin' || $user['AccountType'] === 'Staff') {
+                header('Location: adminPages/adminDashboard.php');
+                exit;
+            } elseif ($user['AccountType'] === 'Professor') {
+                header('Location: staffPages/profPage.php');
+                exit;
+            }
+        } else {
+            $error = 'Invalid email or password.';
+        }
+    } catch (PDOException $e) {
+        // Handle error
+        $error = "Database error: " . $e->getMessage();
     }
 } elseif (isset($_SESSION['email'])) {
     header('Location: adminPages/adminDashboard.php');

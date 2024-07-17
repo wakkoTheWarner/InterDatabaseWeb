@@ -133,3 +133,5 @@
 [2024-06-24 21:56:27] [INFO] root@localhost - Deleted term: 202669 - Success
 [2024-06-24 21:57:24] [INFO] root@localhost - Updated course: TEST aaaa - Success
 [2024-06-24 21:58:16] [INFO] root@localhost - Updated competency: TEST2 - Success
+[2024-07-17 22:07:17] [INFO] root@localhost - Updated terms: 2026691 - Success
+[2024-07-17 22:42:58] [INFO] root@localhost - Deleted course:  - Success
